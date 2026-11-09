@@ -23,13 +23,39 @@ class Document extends Model
         'category_id',
         'department_id',
         'uploaded_by',
+        'direction',
         'status',
+        'subject_id'
     ];
 
     protected $casts = [
         'doc_date' => 'date',
     ];
+    public function scopeAccessibleBy(Builder $query, User $user): Builder
+    {
+        if ($user->isSuperAdmin()) {
+            return $query;
+        }
 
+        return $query->where(function (Builder $q) use ($user) {
+            $q->where('uploaded_by', $user->id)
+                ->orWhereHas('recipients', fn($r) => $r->where('user_id', $user->id))
+                ->orWhereHas('accessList', fn($a) => $a->where('user_id', $user->id));
+        });
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+    public function comments(): HasMany
+    {
+        return $this->hasMany(DocumentComment::class)->oldest();
+    }
+    public function recipients(): HasMany
+    {
+        return $this->hasMany(DocumentRecipient::class);
+    }
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
@@ -80,24 +106,6 @@ class Document extends Model
         return $this->hasMany(AuditLog::class)->orderByDesc('id');
     }
 
-    /**
-     * Scope accessible by a given user based on department or shared access
-     */
-    public function scopeAccessibleBy(Builder $query, User $user): Builder
-    {
-        if ($user->isSuperAdmin()) {
-            return $query;
-        }
-
-        return $query->where(function (Builder $q) use ($user) {
-            if ($user->department_id) {
-                $q->where('department_id', $user->department_id);
-            }
-            $q->orWhereHas('accessList', function (Builder $accessQuery) use ($user) {
-                $accessQuery->where('user_id', $user->id);
-            });
-        });
-    }
 
     /**
      * Search scope by keyword or reference_no
@@ -110,10 +118,10 @@ class Document extends Model
 
         return $query->where(function (Builder $q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
-              ->orWhere('reference_no', 'like', "%{$search}%")
-              ->orWhereHas('tags', function (Builder $tq) use ($search) {
-                  $tq->where('name', 'like', "%{$search}%");
-              });
+                ->orWhere('reference_no', 'like', "%{$search}%")
+                ->orWhereHas('tags', function (Builder $tq) use ($search) {
+                    $tq->where('name', 'like', "%{$search}%");
+                });
         });
     }
 }

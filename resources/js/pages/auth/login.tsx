@@ -19,8 +19,8 @@ interface Props {
 
 export default function Login({ demoUsers }: Props) {
     const { data, setData, post, processing, errors } = useForm({
-        email: 'admin@archive.local',
-        password: 'password',
+        email: '',
+        password: '',
         remember: true,
     });
 

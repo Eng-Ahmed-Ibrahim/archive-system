@@ -1,24 +1,18 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import {
     Building2,
-    Calendar,
     CheckCircle2,
     Edit2,
-    FileText,
-    KeyRound,
-    Lock,
-    Mail,
-    Plus,
-    RefreshCw,
+    Eraser,
     Search,
     Shield,
     Trash2,
-    UserCheck,
     UserPlus,
     Users,
     X,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
 import Pagination from '../../components/Pagination';
 import AppLayout from '../../layouts/AppLayout';
 import type { Department, PaginatedData, User } from '../../types';
@@ -35,6 +29,7 @@ interface UserItem extends User {
     created_at?: string;
     department?: Department | null;
     roles?: any[];
+    order_num?: number;
 }
 
 interface Props {
@@ -46,17 +41,32 @@ interface Props {
     };
     departments: Department[];
     roles: RoleItem[];
+    orderStats: Record<string, number>;
 }
 
-export default function UsersIndex({ users, filters, departments, roles }: Props) {
+const inputCls =
+    'w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500';
+
+export default function UsersIndex({ users, filters, departments, roles, orderStats }: Props) {
     const [search, setSearch] = useState(filters.search || '');
     const [departmentId, setDepartmentId] = useState(filters.department_id || '');
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
+    const signatureRef = useRef<SignatureCanvas>(null);
+
+    // آخر رقم ترتيب مسجل في القسم (d0 = بدون قسم)
+    const getLastOrder = (deptId: string) => orderStats?.[`d${deptId || 0}`] ?? 0;
+
+    const defaultRoleId = roles[0]?.id ? String(roles[0].id) : '';
 
     // Modals
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
+
+    // Signature
+    const [signatureMode, setSignatureMode] = useState<'draw' | 'upload'>('draw');
+    const [signatureImage, setSignatureImage] = useState<string | null>(null);
+    const [signatureFile, setSignatureFile] = useState<File | null>(null);
 
     // Create Form
     const {
@@ -64,15 +74,18 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
         setData: setCreateData,
         post: postCreate,
         processing: createProcessing,
-        reset: resetCreate,
+        clearErrors: clearCreateErrors,
         errors: createErrors,
+        transform: transformCreate,
     } = useForm({
         name: '',
         email: '',
         password: '',
         department_id: '',
-        role_id: roles[0]?.id ? String(roles[0].id) : '',
+        role_id: defaultRoleId,
         status: 'active',
+        signature: null as File | null,
+        order_num: getLastOrder('') + 1,
     });
 
     // Edit Form
@@ -82,6 +95,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
         put: putEdit,
         processing: editProcessing,
         reset: resetEdit,
+        clearErrors: clearEditErrors,
         errors: editErrors,
     } = useForm({
         name: '',
@@ -90,15 +104,38 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
         department_id: '',
         role_id: '',
         status: 'active',
+        order_num: 1,
     });
+
+    // ضبط حجم الـ canvas ليطابق حجمه الظاهر (عشان القلم يرسم في مكانه الصحيح)
+    useEffect(() => {
+        if (!createModalOpen || signatureMode !== 'draw') return;
+
+        const timer = setTimeout(() => {
+            const canvas = signatureRef.current?.getCanvas();
+            if (!canvas) return;
+
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext('2d')?.scale(ratio, ratio);
+            signatureRef.current?.clear();
+        }, 50);
+
+        return () => clearTimeout(timer);
+    }, [createModalOpen, signatureMode]);
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get('/users', {
-            search: search.trim() || undefined,
-            department_id: departmentId || undefined,
-            status: statusFilter || undefined,
-        }, { preserveState: true });
+        router.get(
+            '/users',
+            {
+                search: search.trim() || undefined,
+                department_id: departmentId || undefined,
+                status: statusFilter || undefined,
+            },
+            { preserveState: true },
+        );
     };
 
     const clearFilters = () => {
@@ -108,19 +145,98 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
         router.get('/users');
     };
 
-    const handleCreateSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        postCreate('/users', {
-            onSuccess: () => {
-                setCreateModalOpen(false);
-                resetCreate();
-            },
+    const hasFilters = !!(filters.search || filters.department_id || filters.status);
+
+    // ---------- Signature helpers ----------
+    const canvasToFile = (): Promise<File | null> => {
+        return new Promise((resolve) => {
+            const canvas = signatureRef.current?.getCanvas();
+
+            if (!canvas || signatureRef.current?.isEmpty()) {
+                resolve(null);
+                return;
+            }
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    resolve(null);
+                    return;
+                }
+                resolve(new File([blob], 'signature.png', { type: 'image/png' }));
+            }, 'image/png');
         });
     };
 
+    const clearDrawnSignature = () => {
+        signatureRef.current?.clear();
+    };
+
+    const removeUploadedSignature = () => {
+        if (signatureImage) URL.revokeObjectURL(signatureImage);
+        setSignatureFile(null);
+        setSignatureImage(null);
+    };
+
+    const resetSignatureState = () => {
+        signatureRef.current?.clear();
+        removeUploadedSignature();
+        setSignatureMode('draw');
+    };
+
+    // ---------- Create ----------
+    const openCreateModal = () => {
+        clearCreateErrors();
+        resetSignatureState();
+        // الرقم المقترح = آخر رقم + 1 (بيتحسب وقت الفتح عشان orderStats يكون محدّث)
+        setCreateData({
+            name: '',
+            email: '',
+            password: '',
+            department_id: '',
+            role_id: defaultRoleId,
+            status: 'active',
+            signature: null,
+            order_num: getLastOrder('') + 1,
+        });
+        setCreateModalOpen(true);
+    };
+
+    const closeCreateModal = () => {
+        setCreateModalOpen(false);
+        clearCreateErrors();
+        resetSignatureState();
+    };
+
+    const handleCreateDepartmentChange = (value: string) => {
+        // دالة بتدمج مع القيم الحالية (ماتمسحش باقي الحقول)
+        setCreateData((prev) => ({
+            ...prev,
+            department_id: value,
+            order_num: getLastOrder(value) + 1,
+        }));
+    };
+
+    const handleCreateSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const signature = signatureMode === 'draw' ? await canvasToFile() : signatureFile;
+
+        transformCreate((data) => ({ ...data, signature }));
+
+        postCreate('/users', {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => closeCreateModal(),
+        });
+    };
+
+    // ---------- Edit ----------
     const openEditModal = (user: UserItem) => {
         setSelectedUser(user);
-        const userRoleId = user.roles?.[0]?.id ? String(user.roles[0].id) : (roles[0]?.id ? String(roles[0].id) : '');
+        clearEditErrors();
+
+        const userRoleId = user.roles?.[0]?.id ? String(user.roles[0].id) : defaultRoleId;
+
         setEditData({
             name: user.name,
             email: user.email,
@@ -128,8 +244,16 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
             department_id: user.department_id ? String(user.department_id) : '',
             role_id: userRoleId,
             status: user.status || 'active',
+            order_num: user.order_num ?? 1,
         });
         setEditModalOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setEditModalOpen(false);
+        setSelectedUser(null);
+        clearEditErrors();
+        resetEdit();
     };
 
     const handleEditSubmit = (e: React.FormEvent) => {
@@ -137,12 +261,24 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
         if (!selectedUser) return;
 
         putEdit(`/users/${selectedUser.id}`, {
-            onSuccess: () => {
-                setEditModalOpen(false);
-                setSelectedUser(null);
-                resetEdit();
-            },
+            preserveScroll: true,
+            onSuccess: () => closeEditModal(),
         });
+    };
+
+    const handleEditDepartmentChange = (value: string) => {
+        const originalDept = selectedUser?.department_id ? String(selectedUser.department_id) : '';
+
+        // لو رجع لقسمه الأصلي نرجّع ترتيبه الأصلي، غير كده نقترح آخر رقم + 1
+        const order =
+            value === originalDept ? (selectedUser?.order_num ?? 1) : getLastOrder(value) + 1;
+
+        // دالة بتدمج مع القيم الحالية (ماتمسحش باقي الحقول)
+        setEditData((prev) => ({
+            ...prev,
+            department_id: value,
+            order_num: order,
+        }));
     };
 
     const handleDeleteUser = (user: UserItem) => {
@@ -162,12 +298,11 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                         <Users className="w-5 h-5 text-indigo-400" />
                         <span>إدارة المستخدمين والموظفين</span>
                     </h2>
-
                 </div>
 
                 <button
                     type="button"
-                    onClick={() => setCreateModalOpen(true)}
+                    onClick={openCreateModal}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
                 >
                     <UserPlus className="w-4 h-4" />
@@ -178,7 +313,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
             {/* Search and Filters */}
             <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
                 <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                    <div className="sm:col-span-6 relative">
+                    <div className="sm:col-span-5 relative">
                         <Search className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             type="text"
@@ -197,7 +332,9 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                         >
                             <option value="">كافة الأقسام</option>
                             {departments.map((d) => (
-                                <option key={d.id} value={d.id}>{d.name}</option>
+                                <option key={d.id} value={d.id}>
+                                    {d.name}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -214,14 +351,23 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                         </select>
                     </div>
 
-                    <div className="sm:col-span-1 flex gap-1">
+                    <div className="sm:col-span-2 flex gap-2">
                         <button
                             type="submit"
-                            className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700"
-                            title="بحث"
+                            className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700"
                         >
                             بحث
                         </button>
+                        {hasFilters && (
+                            <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700"
+                                title="مسح الفلاتر"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
                 </form>
             </div>
@@ -233,6 +379,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                         <tr className="border-b border-slate-800 text-slate-400 font-semibold bg-slate-900/80">
                             <th className="py-3.5 px-4">المستخدم</th>
                             <th className="py-3.5 px-3">القسم التابع له</th>
+                            <th className="py-3.5 px-3">الترتيب</th>
                             <th className="py-3.5 px-3">الدور والصلاحية</th>
                             <th className="py-3.5 px-3">الحالة</th>
                             <th className="py-3.5 px-3">تاريخ الانضمام</th>
@@ -260,9 +407,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-[11px] text-slate-400 font-mono">
-                                                    {u.email}
-                                                </div>
+                                                <div className="text-[11px] text-slate-400 font-mono">{u.email}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -275,13 +420,21 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                     </td>
 
                                     <td className="py-3.5 px-3">
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${
-                                            isSuper
-                                                ? 'bg-amber-950/60 text-amber-400 border-amber-800/50'
-                                                : roleName.includes('مؤرشف')
-                                                ? 'bg-purple-950/60 text-purple-400 border-purple-800/50'
-                                                : 'bg-slate-800 text-slate-300 border-slate-700'
-                                        }`}>
+                                        <span className="text-[11px] font-mono text-slate-300 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
+                                            #{u.order_num ?? '-'}
+                                        </span>
+                                    </td>
+
+                                    <td className="py-3.5 px-3">
+                                        <span
+                                            className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${
+                                                isSuper
+                                                    ? 'bg-amber-950/60 text-amber-400 border-amber-800/50'
+                                                    : roleName.includes('مؤرشف')
+                                                      ? 'bg-purple-950/60 text-purple-400 border-purple-800/50'
+                                                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                                            }`}
+                                        >
                                             {roleName}
                                         </span>
                                     </td>
@@ -345,17 +498,13 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
             {/* Create User Modal */}
             {createModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl">
                         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <UserPlus className="w-5 h-5 text-indigo-400" />
-                                <h3 className="text-sm font-bold text-white">إضافة مستخدم جديد للنظام</h3>
+                                <h3 className="text-sm font-bold text-white">إضافة مستخدم</h3>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setCreateModalOpen(false)}
-                                className="text-slate-400 hover:text-white"
-                            >
+                            <button type="button" onClick={closeCreateModal} className="text-slate-400 hover:text-white">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -371,12 +520,10 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                         value={createData.name}
                                         onChange={(e) => setCreateData('name', e.target.value)}
                                         placeholder="مثال: يوسف الدوسري"
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        className={inputCls}
                                         required
                                     />
-                                    {createErrors.name && (
-                                        <p className="text-[11px] text-rose-400">{createErrors.name}</p>
-                                    )}
+                                    {createErrors.name && <p className="text-[11px] text-rose-400">{createErrors.name}</p>}
                                 </div>
 
                                 <div className="space-y-1">
@@ -388,13 +535,103 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                         value={createData.email}
                                         onChange={(e) => setCreateData('email', e.target.value)}
                                         placeholder="user@archive.local"
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        className={inputCls}
                                         required
                                     />
-                                    {createErrors.email && (
-                                        <p className="text-[11px] text-rose-400">{createErrors.email}</p>
-                                    )}
+                                    {createErrors.email && <p className="text-[11px] text-rose-400">{createErrors.email}</p>}
                                 </div>
+                            </div>
+
+                            {/* Signature */}
+                            <div className="space-y-3">
+                                <label className="block text-xs font-semibold text-slate-300">التوقيع الإلكتروني</label>
+
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSignatureMode('draw')}
+                                        className={`flex-1 rounded-lg px-4 py-2 text-xs ${
+                                            signatureMode === 'draw'
+                                                ? 'bg-indigo-600 text-white'
+                                                : 'bg-slate-800 text-slate-300'
+                                        }`}
+                                    >
+                                        رسم التوقيع
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setSignatureMode('upload')}
+                                        className={`flex-1 rounded-lg px-4 py-2 text-xs ${
+                                            signatureMode === 'upload'
+                                                ? 'bg-indigo-600 text-white'
+                                                : 'bg-slate-800 text-slate-300'
+                                        }`}
+                                    >
+                                        رفع صورة
+                                    </button>
+                                </div>
+
+                                {signatureMode === 'draw' ? (
+                                    <div className="space-y-2">
+                                        <div className="rounded-xl border border-slate-700 bg-white overflow-hidden">
+                                            <SignatureCanvas
+                                                ref={signatureRef}
+                                                penColor="black"
+                                                canvasProps={{
+                                                    className: 'w-full h-36 cursor-crosshair touch-none',
+                                                    style: { width: '100%', height: '144px', display: 'block' },
+                                                }}
+                                            />
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={clearDrawnSignature}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs border border-slate-700"
+                                        >
+                                            <Eraser className="w-3.5 h-3.5" />
+                                            <span>مسح وإعادة الكتابة</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/webp"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (!file) return;
+
+                                                if (signatureImage) URL.revokeObjectURL(signatureImage);
+                                                setSignatureFile(file);
+                                                setSignatureImage(URL.createObjectURL(file));
+                                            }}
+                                            className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-white"
+                                        />
+
+                                        {signatureImage && (
+                                            <div className="relative rounded-xl border border-slate-700 bg-white p-4">
+                                                <img
+                                                    src={signatureImage}
+                                                    alt="Signature preview"
+                                                    className="mx-auto h-32 max-w-full object-contain"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={removeUploadedSignature}
+                                                    className="mt-2 text-xs text-red-500"
+                                                >
+                                                    حذف الصورة
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {createErrors.signature && (
+                                    <p className="text-[11px] text-rose-400">{createErrors.signature}</p>
+                                )}
                             </div>
 
                             <div className="space-y-1">
@@ -406,7 +643,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                     value={createData.password}
                                     onChange={(e) => setCreateData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className={inputCls}
                                     required
                                 />
                                 {createErrors.password && (
@@ -416,19 +653,22 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
-                                        القسم التابع له
-                                    </label>
+                                    <label className="block text-xs font-semibold text-slate-300">القسم التابع له</label>
                                     <select
                                         value={createData.department_id}
-                                        onChange={(e) => setCreateData('department_id', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        onChange={(e) => handleCreateDepartmentChange(e.target.value)}
+                                        className={inputCls}
                                     >
                                         <option value="">بدون قسم (الإدارة )</option>
                                         {departments.map((d) => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
+                                            <option key={d.id} value={d.id}>
+                                                {d.name}
+                                            </option>
                                         ))}
                                     </select>
+                                    {createErrors.department_id && (
+                                        <p className="text-[11px] text-rose-400">{createErrors.department_id}</p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1">
@@ -438,22 +678,48 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                     <select
                                         value={createData.role_id}
                                         onChange={(e) => setCreateData('role_id', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        className={inputCls}
                                         required
                                     >
                                         {roles.map((r) => (
-                                            <option key={r.id} value={r.id}>{r.display_name}</option>
+                                            <option key={r.id} value={r.id}>
+                                                {r.display_name}
+                                            </option>
                                         ))}
                                     </select>
+                                    {createErrors.role_id && (
+                                        <p className="text-[11px] text-rose-400">{createErrors.role_id}</p>
+                                    )}
                                 </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="block text-xs font-semibold text-slate-300">
+                                    ترتيب الأولوية في القسم <span className="text-rose-400">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={createData.order_num}
+                                    onChange={(e) => setCreateData('order_num', Number(e.target.value))}
+                                    className={inputCls}
+                                    required
+                                />
+                                <p className="text-[10px] text-slate-500">
+                                    آخر رقم مسجل في هذا القسم: {getLastOrder(createData.department_id) || 'لا يوجد'} (1 =
+                                    الأعلى أولوية)
+                                </p>
+                                {createErrors.order_num && (
+                                    <p className="text-[11px] text-rose-400">{createErrors.order_num}</p>
+                                )}
                             </div>
 
                             <div className="space-y-1">
                                 <label className="block text-xs font-semibold text-slate-300">حالة الحساب</label>
                                 <select
                                     value={createData.status}
-                                    onChange={(e) => setCreateData('status', e.target.value as any)}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    onChange={(e) => setCreateData('status', e.target.value)}
+                                    className={inputCls}
                                 >
                                     <option value="active">نشط (يمكنه تسجيل الدخول)</option>
                                     <option value="inactive">معطل</option>
@@ -463,7 +729,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
                                 <button
                                     type="button"
-                                    onClick={() => setCreateModalOpen(false)}
+                                    onClick={closeCreateModal}
                                     className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
                                 >
                                     إلغاء
@@ -484,17 +750,13 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
             {/* Edit User Modal */}
             {editModalOpen && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl">
                         <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Edit2 className="w-5 h-5 text-indigo-400" />
                                 <h3 className="text-sm font-bold text-white">تعديل بيانات المستخدم</h3>
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => setEditModalOpen(false)}
-                                className="text-slate-400 hover:text-white"
-                            >
+                            <button type="button" onClick={closeEditModal} className="text-slate-400 hover:text-white">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -509,12 +771,10 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                         type="text"
                                         value={editData.name}
                                         onChange={(e) => setEditData('name', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        className={inputCls}
                                         required
                                     />
-                                    {editErrors.name && (
-                                        <p className="text-[11px] text-rose-400">{editErrors.name}</p>
-                                    )}
+                                    {editErrors.name && <p className="text-[11px] text-rose-400">{editErrors.name}</p>}
                                 </div>
 
                                 <div className="space-y-1">
@@ -525,12 +785,10 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                         type="email"
                                         value={editData.email}
                                         onChange={(e) => setEditData('email', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        className={inputCls}
                                         required
                                     />
-                                    {editErrors.email && (
-                                        <p className="text-[11px] text-rose-400">{editErrors.email}</p>
-                                    )}
+                                    {editErrors.email && <p className="text-[11px] text-rose-400">{editErrors.email}</p>}
                                 </div>
                             </div>
 
@@ -544,28 +802,29 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                     value={editData.password}
                                     onChange={(e) => setEditData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className={inputCls}
                                 />
-                                {editErrors.password && (
-                                    <p className="text-[11px] text-rose-400">{editErrors.password}</p>
-                                )}
+                                {editErrors.password && <p className="text-[11px] text-rose-400">{editErrors.password}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
-                                        القسم التابع له
-                                    </label>
+                                    <label className="block text-xs font-semibold text-slate-300">القسم التابع له</label>
                                     <select
                                         value={editData.department_id}
-                                        onChange={(e) => setEditData('department_id', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        onChange={(e) => handleEditDepartmentChange(e.target.value)}
+                                        className={inputCls}
                                     >
                                         <option value="">بدون قسم (الإدارة )</option>
                                         {departments.map((d) => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
+                                            <option key={d.id} value={d.id}>
+                                                {d.name}
+                                            </option>
                                         ))}
                                     </select>
+                                    {editErrors.department_id && (
+                                        <p className="text-[11px] text-rose-400">{editErrors.department_id}</p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-1">
@@ -575,22 +834,46 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                                     <select
                                         value={editData.role_id}
                                         onChange={(e) => setEditData('role_id', e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                        className={inputCls}
                                         required
                                     >
                                         {roles.map((r) => (
-                                            <option key={r.id} value={r.id}>{r.display_name}</option>
+                                            <option key={r.id} value={r.id}>
+                                                {r.display_name}
+                                            </option>
                                         ))}
                                     </select>
+                                    {editErrors.role_id && <p className="text-[11px] text-rose-400">{editErrors.role_id}</p>}
                                 </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="block text-xs font-semibold text-slate-300">
+                                    ترتيب الأولوية في القسم <span className="text-rose-400">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={editData.order_num}
+                                    onChange={(e) => setEditData('order_num', Number(e.target.value))}
+                                    className={inputCls}
+                                    required
+                                />
+                                <p className="text-[10px] text-slate-500">
+                                    آخر رقم مسجل في هذا القسم: {getLastOrder(editData.department_id) || 'لا يوجد'} (1 =
+                                    الأعلى أولوية)
+                                </p>
+                                {editErrors.order_num && (
+                                    <p className="text-[11px] text-rose-400">{editErrors.order_num}</p>
+                                )}
                             </div>
 
                             <div className="space-y-1">
                                 <label className="block text-xs font-semibold text-slate-300">حالة الحساب</label>
                                 <select
                                     value={editData.status}
-                                    onChange={(e) => setEditData('status', e.target.value as any)}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    onChange={(e) => setEditData('status', e.target.value)}
+                                    className={inputCls}
                                 >
                                     <option value="active">نشط</option>
                                     <option value="inactive">معطل</option>
@@ -600,7 +883,7 @@ export default function UsersIndex({ users, filters, departments, roles }: Props
                             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
                                 <button
                                     type="button"
-                                    onClick={() => setEditModalOpen(false)}
+                                    onClick={closeEditModal}
                                     className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
                                 >
                                     إلغاء

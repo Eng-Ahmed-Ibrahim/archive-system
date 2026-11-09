@@ -6,31 +6,63 @@ use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\AuditService;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class UserController extends Controller
 {
+    private function authorizeManage(Request $request, string $message): void
+    {
+        $user = $request->user();
+
+        if (!$user->isSuperAdmin() && !$user->hasPermission('users.manage')) {
+            abort(403, $message);
+        }
+    }
+
+    /**
+     * التحقق إن رقم الترتيب مش مستخدم في نفس القسم،
+     * ولو مستخدم بيرجّع آخر رقم مسجل والمقترح.
+     */
+    private function orderRule(?int $departmentId, ?int $ignoreId = null): Closure
+    {
+        return function ($attribute, $value, $fail) use ($departmentId, $ignoreId) {
+            $base = User::query()->when(
+                $departmentId,
+                fn ($q) => $q->where('department_id', $departmentId),
+                fn ($q) => $q->whereNull('department_id'),
+            );
+
+            $taken = (clone $base)
+                ->where('order_num', $value)
+                ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+                ->exists();
+
+            if ($taken) {
+                $last = (int) (clone $base)->max('order_num');
+                $fail("رقم الترتيب {$value} مستخدم بالفعل في هذا القسم. آخر رقم مسجل: {$last}، المقترح: " . ($last + 1));
+            }
+        };
+    }
+
     /**
      * Display a listing of users
      */
     public function index(Request $request): Response
     {
-        $currentUser = $request->user();
-
-        if (!$currentUser->isSuperAdmin() && !$currentUser->hasPermission('users.manage')) {
-            abort(403, 'غير مصرح لك بإدارة المستخدمين.');
-        }
+        $this->authorizeManage($request, 'غير مصرح لك بإدارة المستخدمين.');
 
         $query = User::with(['department', 'roles'])->withCount('uploadedDocuments');
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -42,16 +74,29 @@ class UserController extends Controller
             $query->where('status', $status);
         }
 
-        $users = $query->latest('id')->paginate(15)->withQueryString();
+        // الترتيب: القسم ثم الأولوية داخل القسم
+        $users = $query
+            ->orderBy('department_id')
+            ->orderBy('order_num')
+            ->paginate(15)
+            ->withQueryString();
 
         $departments = Department::all(['id', 'name']);
         $roles = Role::all(['id', 'name', 'display_name']);
+
+        // آخر رقم ترتيب لكل قسم (المفتاح d0 = بدون قسم)
+        $orderStats = User::query()
+            ->selectRaw('department_id, MAX(order_num) as max_order')
+            ->groupBy('department_id')
+            ->get()
+            ->mapWithKeys(fn ($r) => ['d' . ($r->department_id ?? 0) => (int) $r->max_order]);
 
         return Inertia::render('users/index', [
             'users' => $users,
             'filters' => $request->only(['search', 'department_id', 'status']),
             'departments' => $departments,
             'roles' => $roles,
+            'orderStats' => $orderStats,
         ]);
     }
 
@@ -61,38 +106,50 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $currentUser = $request->user();
+        $this->authorizeManage($request, 'غير مصرح لك بإضافة مستخدمين.');
 
-        if (!$currentUser->isSuperAdmin() && !$currentUser->hasPermission('users.manage')) {
-            abort(403, 'غير مصرح لك بإضافة مستخدمين.');
-        }
+        $departmentId = $request->integer('department_id') ?: null;
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password'      => ['required', 'string', 'min:6'],
             'department_id' => ['nullable', 'exists:departments,id'],
-            'role_id' => ['required', 'exists:roles,id'],
-            'status' => ['required', 'in:active,inactive'],
+            'role_id'       => ['required', 'exists:roles,id'],
+            'status'        => ['required', 'in:active,inactive'],
+            'signature'     => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'order_num'     => ['required', 'integer', 'min:1', $this->orderRule($departmentId)],
         ]);
 
+        // التوقيع (مرسوم أو مرفوع) بيوصل كملف عادي
+        $signaturePath = $request->hasFile('signature')
+            ? $request->file('signature')->store('signatures', 'public')
+            : null;
+
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'department_id' => !empty($validated['department_id']) ? $validated['department_id'] : null,
-            'status' => $validated['status'],
+            'name'           => $validated['name'],
+            'email'          => $validated['email'],
+            'password'       => Hash::make($validated['password']),
+            'department_id'  => $validated['department_id'] ?? null,
+            'status'         => $validated['status'],
+            'signature_path' => $signaturePath,
+            'order_num'      => $validated['order_num'],
         ]);
 
         $user->roles()->sync([$validated['role_id']]);
 
         AuditService::log('create_user', null, [
             'created_user_id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'department_id' => $user->department_id,
+            'name'            => $user->name,
+            'email'           => $user->email,
+            'department_id'   => $user->department_id,
+            'order_num'       => $user->order_num,
         ], $currentUser);
 
-        return back()->with('success', "تم إنشاء حساب المستخدم \"{$user->name}\" بنجاح.");
+        return back()->with(
+            'success',
+            "تم إنشاء حساب المستخدم \"{$user->name}\" بنجاح."
+        );
     }
 
     /**
@@ -101,25 +158,26 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $currentUser = $request->user();
+        $this->authorizeManage($request, 'غير مصرح لك بتعديل المستخدمين.');
 
-        if (!$currentUser->isSuperAdmin() && !$currentUser->hasPermission('users.manage')) {
-            abort(403, 'غير مصرح لك بتعديل المستخدمين.');
-        }
+        $departmentId = $request->integer('department_id') ?: null;
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string', 'min:6'],
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password'      => ['nullable', 'string', 'min:6'],
             'department_id' => ['nullable', 'exists:departments,id'],
-            'role_id' => ['required', 'exists:roles,id'],
-            'status' => ['required', 'in:active,inactive'],
+            'role_id'       => ['required', 'exists:roles,id'],
+            'status'        => ['required', 'in:active,inactive'],
+            'order_num'     => ['required', 'integer', 'min:1', $this->orderRule($departmentId, $user->id)],
         ]);
 
         $userData = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'department_id' => !empty($validated['department_id']) ? $validated['department_id'] : null,
-            'status' => $validated['status'],
+            'name'          => $validated['name'],
+            'email'         => $validated['email'],
+            'department_id' => $validated['department_id'] ?? null,
+            'status'        => $validated['status'],
+            'order_num'     => $validated['order_num'],
         ];
 
         if (!empty($validated['password'])) {
@@ -131,9 +189,10 @@ class UserController extends Controller
 
         AuditService::log('update_user', null, [
             'updated_user_id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'status' => $user->status,
+            'name'            => $user->name,
+            'email'           => $user->email,
+            'status'          => $user->status,
+            'order_num'       => $user->order_num,
         ], $currentUser);
 
         return back()->with('success', "تم تحديث بيانات المستخدم \"{$user->name}\" بنجاح.");
@@ -145,10 +204,7 @@ class UserController extends Controller
     public function destroy(Request $request, User $user): RedirectResponse
     {
         $currentUser = $request->user();
-
-        if (!$currentUser->isSuperAdmin() && !$currentUser->hasPermission('users.manage')) {
-            abort(403, 'غير مصرح لك بحذف المستخدمين.');
-        }
+        $this->authorizeManage($request, 'غير مصرح لك بحذف المستخدمين.');
 
         if ((int) $user->id === (int) $currentUser->id) {
             return back()->with('error', 'لا يمكنك حذف حسابك الشخصي المسجل به حالياً.');
@@ -158,9 +214,13 @@ class UserController extends Controller
 
         AuditService::log('delete_user', null, [
             'deleted_user_id' => $user->id,
-            'name' => $name,
-            'email' => $user->email,
+            'name'            => $name,
+            'email'           => $user->email,
         ], $currentUser);
+
+        if ($user->signature_path) {
+            Storage::disk('public')->delete($user->signature_path);
+        }
 
         $user->roles()->detach();
         $user->delete();

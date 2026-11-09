@@ -1,20 +1,20 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
-    Calendar,
+    ArrowDownToLine,
+    ArrowUpFromLine,
+    Bell,
     FilePlus,
     FileText,
     Filter,
     RefreshCw,
     Search,
-    Tag as TagIcon,
-    X,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import DocumentTable from '../../components/DocumentTable';
 import FilePreviewModal from '../../components/FilePreviewModal';
 import Pagination from '../../components/Pagination';
 import AppLayout from '../../layouts/AppLayout';
-import type { Category, Department, DocumentItem, DocumentType, PaginatedData, SharedProps, Tag } from '../../types';
+import type { Category, Department, DocumentItem, PaginatedData, SharedProps } from '../../types';
 
 interface Props {
     documents: PaginatedData<DocumentItem>;
@@ -22,49 +22,48 @@ interface Props {
         search?: string;
         department_id?: string;
         category_id?: string;
-        type_id?: string;
-        status?: string;
+        direction?: string;
+        unread?: string;
         date_from?: string;
         date_to?: string;
-        tag?: string;
     };
+    counts: { incoming: number; outgoing: number };
     departments: Department[];
     categories: Category[];
-    documentTypes: DocumentType[];
-    tags: Tag[];
 }
 
-export default function DocumentsIndex({
-    documents,
-    filters,
-    departments,
-    categories,
-    documentTypes,
-    tags,
-}: Props) {
+export default function DocumentsIndex({ documents, filters, counts, departments, categories }: Props) {
+    const { auth } = usePage<SharedProps>().props;
+    const roles: string[] = (auth.user as any).roles ?? [];
+    const isAdmin = roles.includes('admin');
+    const canUpload = ['admin', 'archivist'].some((r) => roles.includes(r));
+
     const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
     const [search, setSearch] = useState(filters.search || '');
     const [departmentId, setDepartmentId] = useState(filters.department_id || '');
     const [categoryId, setCategoryId] = useState(filters.category_id || '');
-    const [typeId, setTypeId] = useState(filters.type_id || '');
-    const [status, setStatus] = useState(filters.status || '');
     const [dateFrom, setDateFrom] = useState(filters.date_from || '');
     const [dateTo, setDateTo] = useState(filters.date_to || '');
-    const [selectedTag, setSelectedTag] = useState(filters.tag || '');
     const [showFilters, setShowFilters] = useState(false);
-    const { auth, flash, appName } = usePage<SharedProps>().props;
 
-    const applyFilters = () => {
-        router.get('/documents', {
-            search: search.trim() || undefined,
-            department_id: departmentId || undefined,
-            category_id: categoryId || undefined,
-            type_id: typeId || undefined,
-            status: status || undefined,
-            date_from: dateFrom || undefined,
-            date_to: dateTo || undefined,
-            tag: selectedTag || undefined,
-        }, { preserveState: true });
+    const direction = filters.direction || '';
+    const unread = filters.unread === '1';
+
+    const applyFilters = (override: Record<string, string | undefined> = {}) => {
+        router.get(
+            '/documents',
+            {
+                search: search.trim() || undefined,
+                department_id: departmentId || undefined,
+                category_id: categoryId || undefined,
+                date_from: dateFrom || undefined,
+                date_to: dateTo || undefined,
+                direction: direction || undefined,
+                unread: unread ? '1' : undefined,
+                ...override,
+            },
+            { preserveState: true },
+        );
     };
 
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -76,24 +75,19 @@ export default function DocumentsIndex({
         setSearch('');
         setDepartmentId('');
         setCategoryId('');
-        setTypeId('');
-        setStatus('');
         setDateFrom('');
         setDateTo('');
-        setSelectedTag('');
         router.get('/documents');
     };
 
-    const hasActiveFilters = !!(
-        filters.search ||
-        filters.department_id ||
-        filters.category_id ||
-        filters.type_id ||
-        filters.status ||
-        filters.date_from ||
-        filters.date_to ||
-        filters.tag
-    );
+    const hasActiveFilters = Object.values(filters).some(Boolean);
+
+    const tabCls = (active: boolean) =>
+        `flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-colors ${
+            active
+                ? 'bg-indigo-950/80 border-indigo-600 text-indigo-300'
+                : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
+        }`;
 
     return (
         <AppLayout title="الأرشيف والمستندات">
@@ -101,30 +95,26 @@ export default function DocumentsIndex({
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
-                <div className="space-y-1">
-                    <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-indigo-400" />
-                        <span>جميع الملفات</span>
-                    </h2>
-
-                </div>
+                <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-indigo-400" />
+                    <span>المستندات</span>
+                </h2>
 
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold shadow transition-colors ${showFilters || hasActiveFilters
-                            ? 'bg-indigo-950/80 border-indigo-600 text-indigo-300'
-                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
-                            }`}
+                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold shadow transition-colors ${
+                            showFilters
+                                ? 'bg-indigo-950/80 border-indigo-600 text-indigo-300'
+                                : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                        }`}
                     >
                         <Filter className="w-4 h-4" />
-                        <span>الفلاتر المتقدمة</span>
-                        {hasActiveFilters && (
-                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                        )}
+                        <span>فلاتر</span>
                     </button>
-                    {['admin','archivist'].some((role) => auth.user.roles?.includes(role)) && (
+
+                    {canUpload && (
                         <Link
                             href="/documents/create"
                             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
@@ -136,7 +126,38 @@ export default function DocumentsIndex({
                 </div>
             </div>
 
-            {/* Search & Filter Bar */}
+            {/* Direction tabs */}
+            <div className="flex flex-wrap items-center gap-2">
+                <button type="button" onClick={() => applyFilters({ direction: undefined })} className={tabCls(!direction)}>
+                    الكل
+                </button>
+                <button
+                    type="button"
+                    onClick={() => applyFilters({ direction: 'incoming' })}
+                    className={tabCls(direction === 'incoming')}
+                >
+                    <ArrowDownToLine className="w-3.5 h-3.5" />
+                    وارد ({counts.incoming})
+                </button>
+                <button
+                    type="button"
+                    onClick={() => applyFilters({ direction: 'outgoing' })}
+                    className={tabCls(direction === 'outgoing')}
+                >
+                    <ArrowUpFromLine className="w-3.5 h-3.5" />
+                    صادر ({counts.outgoing})
+                </button>
+                <button
+                    type="button"
+                    onClick={() => applyFilters({ unread: unread ? undefined : '1' })}
+                    className={tabCls(unread)}
+                >
+                    <Bell className="w-3.5 h-3.5" />
+                    لم أقرأها
+                </button>
+            </div>
+
+            {/* Search */}
             <div className="space-y-3">
                 <form onSubmit={handleSearchSubmit} className="flex gap-2">
                     <div className="relative flex-1">
@@ -145,7 +166,7 @@ export default function DocumentsIndex({
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="ابحث بالعنوان، أو الرقم المرجعي، أو الوسم..."
+                            placeholder="ابحث بالعنوان أو الرقم المرجعي..."
                             className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pr-10 pl-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-inner"
                         />
                     </div>
@@ -159,7 +180,7 @@ export default function DocumentsIndex({
                         <button
                             type="button"
                             onClick={clearFilters}
-                            className="px-3.5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 border border-slate-700 text-slate-400 hover:text-rose-300 text-xs transition-colors"
+                            className="px-3.5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 border border-slate-700 text-slate-400 hover:text-rose-300 transition-colors"
                             title="إلغاء جميع الفلاتر"
                         >
                             <RefreshCw className="w-4 h-4" />
@@ -167,16 +188,13 @@ export default function DocumentsIndex({
                     )}
                 </form>
 
-                {/* Extended Filters Drawer */}
                 {showFilters && (
-                    <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4 animate-in fade-in">
+                    <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-
-                            {['admin'].some((role) => auth.user.roles?.includes(role)) && (
-
+                            {isAdmin && (
                                 <>
                                     <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-slate-400">القسم التنظيمي</label>
+                                        <label className="text-[11px] font-semibold text-slate-400">القسم</label>
                                         <select
                                             value={departmentId}
                                             onChange={(e) => setDepartmentId(e.target.value)}
@@ -184,13 +202,15 @@ export default function DocumentsIndex({
                                         >
                                             <option value="">كافة الأقسام</option>
                                             {departments.map((d) => (
-                                                <option key={d.id} value={d.id}>{d.name}</option>
+                                                <option key={d.id} value={d.id}>
+                                                    {d.name}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-slate-400">المجلد والتصنيف</label>
+                                        <label className="text-[11px] font-semibold text-slate-400">المجلد</label>
                                         <select
                                             value={categoryId}
                                             onChange={(e) => setCategoryId(e.target.value)}
@@ -198,17 +218,15 @@ export default function DocumentsIndex({
                                         >
                                             <option value="">كافة المجلدات</option>
                                             {categories.map((c) => (
-                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
                                 </>
-
                             )}
-                        </div>
 
-                        {/* Date Range & Tags */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800">
                             <div className="space-y-1">
                                 <label className="text-[11px] font-semibold text-slate-400">من تاريخ</label>
                                 <input
@@ -228,8 +246,6 @@ export default function DocumentsIndex({
                                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                                 />
                             </div>
-
-
                         </div>
 
                         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
@@ -242,26 +258,20 @@ export default function DocumentsIndex({
                             </button>
                             <button
                                 type="button"
-                                onClick={applyFilters}
+                                onClick={() => applyFilters()}
                                 className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow"
                             >
-                                تطبيق التصفية
+                                تطبيق
                             </button>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Document Table */}
-            <DocumentTable
-                documents={documents.data}
-                onPreview={(doc) => setPreviewDoc(doc)}
-            />
+            <DocumentTable documents={documents.data} onPreview={(doc) => setPreviewDoc(doc)} />
 
-            {/* Pagination */}
             <Pagination links={documents.links} />
 
-            {/* Preview Modal */}
             <FilePreviewModal
                 document={previewDoc}
                 isOpen={!!previewDoc}

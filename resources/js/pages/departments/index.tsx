@@ -106,7 +106,7 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                         <Building2 className="w-5 h-5 text-indigo-400" />
                         <span>الاقسام </span>
                     </h2>
-     
+
                 </div>
 
                 {canManage && (
@@ -207,21 +207,21 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                         <div className="flex items-center justify-between pt-2">
                             {dept.can_access ? (
                                 <Link
-                                    href={`/categories?department_id=${dept.id}`}
+                                    href={`/users?department_id=${dept.id}`}
                                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
                                 >
-                                    <FolderTree className="w-3.5 h-3.5 text-amber-300" />
-                                    <span>دخول القسم وتصفح مجلداته</span>
+                                    <Users className="w-3.5 h-3.5 text-amber-300" />
+                                    <span>عرض موظفي القسم ({dept.users_count || 0})</span>
                                     <ArrowLeft className="w-3.5 h-3.5" />
                                 </Link>
                             ) : (
                                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
                                     <Lock className="w-3.5 h-3.5" />
-                                    <span>معزول عن صلاحياتك المباشرة</span>
+                                    <span>غير مصرح لك بعرض المستخدمين</span>
                                 </div>
                             )}
 
-       
+
                         </div>
                     </div>
                 ))}

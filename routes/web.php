@@ -9,6 +9,7 @@ use App\Http\Controllers\DocumentAccessController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentFileController;
 use App\Http\Controllers\DocumentVersionController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,7 +54,7 @@ Route::middleware('auth')->group(function () {
 
     // Documents
     Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
-    Route::get('/documents/create', [DocumentController::class, 'create'])->name('documents.create');
+    Route::get('/document/create', [DocumentController::class, 'create'])->name('documents.create');
     Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::put('/documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
@@ -73,4 +74,9 @@ Route::middleware('auth')->group(function () {
 
     // Audit Logs
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
+Route::post('documents/{document}/comments', [DocumentController::class, 'comment'])->name('documents.comments.store');
+Route::post('documents/{document}/forward', [DocumentController::class, 'forward'])->name('documents.forward');
+
+    Route::resource('subjects', SubjectController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 });

@@ -34,6 +34,8 @@ class User extends Authenticatable
         'password',
         'department_id',
         'status',
+        'signature_path',
+        'order_num'
     ];
 
     protected $hidden = [
@@ -48,7 +50,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    private function orderRule(?int $departmentId, ?int $ignoreId = null): \Closure
+    {
+        return function ($attribute, $value, $fail) use ($departmentId, $ignoreId) {
+            $base = User::query()->when(
+                $departmentId,
+                fn($q) => $q->where('department_id', $departmentId),
+                fn($q) => $q->whereNull('department_id'),
+            );
 
+            $taken = (clone $base)
+                ->where('order_num', $value)
+                ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+                ->exists();
+
+            if ($taken) {
+                $last = (int) (clone $base)->max('order_num');
+                $fail("رقم الترتيب {$value} مستخدم بالفعل في هذا القسم. آخر رقم مسجل: {$last}، المقترح: " . ($last + 1));
+            }
+        };
+    }
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);

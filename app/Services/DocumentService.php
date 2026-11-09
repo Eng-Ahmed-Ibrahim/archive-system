@@ -43,6 +43,7 @@ class DocumentService
                 'department_id' => $data['department_id'],
                 'uploaded_by' => $user->id,
                 'status' => $data['status'] ?? 'active',
+                'subject_id'=>$data['subject_id']
             ]);
 
             $version = DocumentVersion::create([

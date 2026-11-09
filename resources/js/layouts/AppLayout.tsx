@@ -1,6 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Archive,
+    BookOpen,
     Building2,
     CheckCircle2,
     ChevronDown,
@@ -54,14 +55,17 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
         { name: 'لوحة التحكم', href: '/dashboard', icon: LayoutDashboard },
         { name: ' المجلدات', href: '/categories', icon: FolderTree },
         { name: 'الأرشيف والمستندات', href: '/documents', icon: FileText },
-        { name: 'رفع ملف جديد', href: '/documents/create', icon: FilePlus },
+        { name: 'رفع ملف جديد', href: '/document/create', icon: FilePlus },
     ];
 
     if (auth.user?.is_admin  || auth.user?.permissions?.includes('*')) {
-        navItems.push({ name: 'الاقسام', href: 'departments', icon: Building2 });
+        navItems.push({ name: 'الاقسام', href: '/departments', icon: Building2 });
     }
     if (auth.user?.is_admin || auth.user?.permissions?.includes('users.manage') || auth.user?.permissions?.includes('*')) {
         navItems.push({ name: 'إدارة المستخدمين', href: '/users', icon: Users });
+    }
+    if (auth.user?.is_admin || auth.user?.permissions?.includes('*')) {
+        navItems.push({ name: 'المواضيع', href: '/subjects', icon: BookOpen });
     }
 
     if (auth.user?.is_admin || auth.user?.permissions?.includes('audit.view') || auth.user?.permissions?.includes('*')) {
