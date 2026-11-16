@@ -3,6 +3,8 @@ import {
     ArrowDownToLine,
     ArrowUpFromLine,
     Bell,
+    CheckCircle2,
+    Clock,
     FilePlus,
     FileText,
     Filter,
@@ -23,11 +25,12 @@ interface Props {
         department_id?: string;
         category_id?: string;
         direction?: string;
+        status?: string;
         unread?: string;
         date_from?: string;
         date_to?: string;
     };
-    counts: { incoming: number; outgoing: number };
+    counts: { incoming: number; outgoing: number; pending?: number; finish?: number };
     departments: Department[];
     categories: Category[];
 }
@@ -47,6 +50,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
     const [showFilters, setShowFilters] = useState(false);
 
     const direction = filters.direction || '';
+    const status = filters.status || '';
     const unread = filters.unread === '1';
 
     const applyFilters = (override: Record<string, string | undefined> = {}) => {
@@ -59,6 +63,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                 date_from: dateFrom || undefined,
                 date_to: dateTo || undefined,
                 direction: direction || undefined,
+                status: status || undefined,
                 unread: unread ? '1' : undefined,
                 ...override,
             },
@@ -126,26 +131,46 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                 </div>
             </div>
 
-            {/* Direction tabs */}
+            {/* Filter tabs */}
             <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => applyFilters({ direction: undefined })} className={tabCls(!direction)}>
+                <button
+                    type="button"
+                    onClick={() => applyFilters({ direction: undefined, status: undefined })}
+                    className={tabCls(!direction && !status)}
+                >
                     الكل
                 </button>
                 <button
                     type="button"
-                    onClick={() => applyFilters({ direction: 'incoming' })}
-                    className={tabCls(direction === 'incoming')}
+                    onClick={() => applyFilters({ status: 'pending', direction: undefined })}
+                    className={tabCls(status === 'pending')}
                 >
-                    <ArrowDownToLine className="w-3.5 h-3.5" />
-                    وارد ({counts.incoming})
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>قيد الإجراء ({counts.pending ?? 0})</span>
                 </button>
                 <button
                     type="button"
-                    onClick={() => applyFilters({ direction: 'outgoing' })}
+                    onClick={() => applyFilters({ status: 'finish', direction: undefined })}
+                    className={tabCls(status === 'finish')}
+                >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>مكتمل ({counts.finish ?? 0})</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => applyFilters({ direction: 'incoming', status: undefined })}
+                    className={tabCls(direction === 'incoming')}
+                >
+                    <ArrowDownToLine className="w-3.5 h-3.5" />
+                    <span>وارد ({counts.incoming})</span>
+                </button>
+                <button
+                    type="button"
+                    onClick={() => applyFilters({ direction: 'outgoing', status: undefined })}
                     className={tabCls(direction === 'outgoing')}
                 >
                     <ArrowUpFromLine className="w-3.5 h-3.5" />
-                    صادر ({counts.outgoing})
+                    <span>صادر ({counts.outgoing})</span>
                 </button>
                 <button
                     type="button"
@@ -153,7 +178,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     className={tabCls(unread)}
                 >
                     <Bell className="w-3.5 h-3.5" />
-                    لم أقرأها
+                    <span>لم أقرأها</span>
                 </button>
             </div>
 

@@ -6,6 +6,8 @@ import {
     Bell,
     Building2,
     Calendar,
+    CheckCircle2,
+    Clock,
     FileCheck,
     FileText,
 } from 'lucide-react';
@@ -30,6 +32,8 @@ interface Props {
         outgoing: number;
         today: number;
         unread: number;
+        pending?: number;
+        finish?: number;
     };
     departments: DeptStat[];
     recentDocuments: DocumentItem[];
@@ -40,25 +44,39 @@ export default function Dashboard({ stats, departments, recentDocuments }: Props
 
     const cards = [
         {
-            label: 'كل المستندات المتاحة لي',
+            label: 'كل المستندات',
             value: stats.total,
             href: '/documents',
             icon: FileText,
             tone: 'bg-indigo-950/80 border-indigo-800/50 text-indigo-400',
         },
         {
+            label: 'قيد الإجراء (Pending)',
+            value: stats.pending ?? 0,
+            href: '/documents?status=pending',
+            icon: Clock,
+            tone: 'bg-amber-950/80 border-amber-800/50 text-amber-400',
+        },
+        {
+            label: 'مكتمل (Finish)',
+            value: stats.finish ?? 0,
+            href: '/documents?status=finish',
+            icon: CheckCircle2,
+            tone: 'bg-emerald-950/80 border-emerald-800/50 text-emerald-400',
+        },
+        {
             label: 'وارد',
             value: stats.incoming,
             href: '/documents?direction=incoming',
             icon: ArrowDownToLine,
-            tone: 'bg-emerald-950/80 border-emerald-800/50 text-emerald-400',
+            tone: 'bg-teal-950/80 border-teal-800/50 text-teal-400',
         },
         {
             label: 'صادر',
             value: stats.outgoing,
             href: '/documents?direction=outgoing',
             icon: ArrowUpFromLine,
-            tone: 'bg-amber-950/80 border-amber-800/50 text-amber-400',
+            tone: 'bg-cyan-950/80 border-cyan-800/50 text-cyan-400',
         },
         {
             label: 'لم أقرأها بعد',
@@ -67,13 +85,6 @@ export default function Dashboard({ stats, departments, recentDocuments }: Props
             icon: Bell,
             tone: 'bg-rose-950/80 border-rose-800/50 text-rose-400',
         },
-        {
-            label: 'مرفوعات اليوم',
-            value: stats.today,
-            href: '/documents',
-            icon: Calendar,
-            tone: 'bg-cyan-950/80 border-cyan-800/50 text-cyan-400',
-        },
     ];
 
     return (
@@ -81,7 +92,7 @@ export default function Dashboard({ stats, departments, recentDocuments }: Props
             <Head title="لوحة التحكم - سيستم الأرشيف" />
 
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
                 {cards.map((c) => (
                     <Link
                         key={c.label}

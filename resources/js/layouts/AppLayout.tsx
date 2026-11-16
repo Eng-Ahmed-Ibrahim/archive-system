@@ -12,6 +12,7 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
+    PenTool,
     Search,
     Shield,
     UserCheck,
@@ -56,6 +57,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
         { name: ' المجلدات', href: '/categories', icon: FolderTree },
         { name: 'الأرشيف والمستندات', href: '/documents', icon: FileText },
         { name: 'رفع ملف جديد', href: '/document/create', icon: FilePlus },
+        { name: 'الملف الشخصي والتوقيع', href: '/profile', icon: PenTool },
     ];
 
     if (auth.user?.is_admin  || auth.user?.permissions?.includes('*')) {
@@ -119,14 +121,17 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
                     <div className="flex items-center gap-2.5">
   
                         {/* Current User Badge */}
-                        <div className="flex items-center gap-2 pr-2 border-r border-slate-800">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow">
+                        <Link
+                            href="/profile"
+                            className="flex items-center gap-2 pr-2 border-r border-slate-800 hover:bg-slate-800/50 py-1 px-2 rounded-xl transition-colors group"
+                            title="عرض الملف الشخصي وإدارة التوقيع"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow group-hover:scale-105 transition-transform">
                                 {auth.user?.name ? auth.user.name.charAt(0) : 'U'}
                             </div>
                             <div className="hidden lg:block text-right">
-                                <div className="text-xs font-semibold text-slate-100 flex items-center gap-1">
+                                <div className="text-xs font-semibold text-slate-100 flex items-center gap-1 group-hover:text-indigo-300 transition-colors">
                                     {auth.user?.name}
-                              
                                 </div>
                                 <div className="text-[10px] text-slate-400">
                                     {typeof auth.user?.department === 'string'
@@ -134,7 +139,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
                                         : (auth.user?.department as any)?.name ?? 'الإدارة '}
                                 </div>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Logout Button */}
                         <button

@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -26,8 +27,7 @@ class DocumentController extends Controller
     ) {}
 
     /**
-     * المستخدم العادي يحوّل بس لموظفين نفس قسمه ورقمهم أكبر من رقمه (أقل رتبة).
-     * السوبر أدمن يحوّل لأي موظف نشط. الموجودين كمستلمين أصلاً مستبعدين.
+     * المستخدمين المتاح التحويل لهم في نفس القسم (للتوافق القديم)
      */
     private function forwardableUsers(User $user, Document $document): Collection
     {
@@ -42,8 +42,7 @@ class DocumentController extends Controller
                 return collect();
             }
 
-            $query->where('department_id', $user->department_id)
-                ->where('order_num', '>', (int) $user->order_num);
+            $query->where('department_id', $user->department_id);
         }
 
         return $query->with('department:id,name')
@@ -52,11 +51,17 @@ class DocumentController extends Controller
             ->get(['id', 'name', 'department_id', 'order_num']);
     }
 
-    /** مين يقدر يحوّل: السوبر أدمن أو واحد من المستلمين */
+    /**
+     * مين يقدر يحوّل ويوقع ويتحكم في المستند:
+     * السوبر أدمن، أو من قام بالرفع، أو أي مستلم أو من تم منحه صلاحية وصول
+     */
     private function canForward(User $user, Document $document): bool
     {
         return $user->isSuperAdmin()
-            || $document->recipients()->where('user_id', $user->id)->exists();
+            || $document->uploaded_by === $user->id
+            || $document->recipients()->where('user_id', $user->id)->exists()
+            || $document->accessList()->where('user_id', $user->id)->exists()
+            || ($user->department_id && $user->department_id === $document->department_id);
     }
 
     public function index(Request $request): Response
@@ -82,6 +87,10 @@ class DocumentController extends Controller
             $query->where('direction', $direction);
         }
 
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
         if ($request->boolean('unread')) {
             $query->whereHas('recipients', fn($q) => $q
                 ->where('user_id', $user->id)
@@ -100,10 +109,12 @@ class DocumentController extends Controller
 
         return Inertia::render('documents/index', [
             'documents' => $documents,
-            'filters' => $request->only(['search', 'department_id', 'category_id', 'direction', 'unread', 'date_from', 'date_to']),
+            'filters' => $request->only(['search', 'department_id', 'category_id', 'direction', 'status', 'unread', 'date_from', 'date_to']),
             'counts' => [
                 'incoming' => Document::accessibleBy($user)->where('direction', 'incoming')->count(),
                 'outgoing' => Document::accessibleBy($user)->where('direction', 'outgoing')->count(),
+                'pending'  => Document::accessibleBy($user)->where('status', 'pending')->count(),
+                'finish'   => Document::accessibleBy($user)->where('status', 'finish')->count(),
             ],
             'departments' => Department::all(['id', 'name']),
             'categories' => Category::all(['id', 'name', 'parent_id', 'department_id']),
@@ -134,14 +145,16 @@ class DocumentController extends Controller
             }])
             ->orderBy('name')
             ->get(['id', 'name']);
+
         $subjectsQuery = Subject::query();
         if (!$user->isSuperAdmin() && $user->department_id) {
             $subjectsQuery->where('department_id', $user->department_id);
         }
         $subjects = $subjectsQuery->get();
+
         return Inertia::render('documents/create', [
             'departments' => $departments,
-            'subjects' => $subjects, // <-- تمرير المواضيع للواجهة
+            'subjects' => $subjects,
             'categories' => $categories->get(),
             'defaultDepartmentId' => $user->department_id,
             'recipientDepartments' => $recipientDepartments,
@@ -163,9 +176,8 @@ class DocumentController extends Controller
             'subject_id' => [
                 'required',
                 'exists:subjects,id',
-                // التحقق من أن الموضوع يتبع للقسم المُختار تماماً لمنع أي تلاعب
                 function ($attribute, $value, $fail) use ($request) {
-                    $exists = \App\Models\Subject::where('id', $value)
+                    $exists = Subject::where('id', $value)
                         ->where('department_id', $request->department_id)
                         ->exists();
 
@@ -176,7 +188,6 @@ class DocumentController extends Controller
             ],
             'file' => ['required', 'file', 'max:51200'],
             'comment' => ['nullable', 'string', 'max:2000'],
-
             'recipients' => ['nullable', 'array'],
             'recipients.*.department_id' => ['required', 'distinct', 'exists:departments,id'],
             'recipients.*.user_ids' => ['required', 'array', 'min:1'],
@@ -188,6 +199,7 @@ class DocumentController extends Controller
             'recipients.*.department_id.distinct' => 'القسم مكرر.',
             'subject_id.required' => 'اختر موضوع المستند.',
         ]);
+
         $recipients = $validated['recipients'] ?? [];
         $comment = trim((string) ($validated['comment'] ?? ''));
         $direction = $validated['direction'];
@@ -210,10 +222,10 @@ class DocumentController extends Controller
             $validated['department_id'] = $user->department_id;
         }
 
-        // قيم افتراضية لأن الفورم مبقاش يبعتها (الـ Service ممكن يعتمد عليها)
+        // الحالة تبدأ دائماً بـ pending (قيد الإجراء)
         $validated += [
             'type_id' => null,
-            'status' => 'active',
+            'status' => 'pending',
             'tags' => [],
             'change_notes' => 'النسخة الأصلية الأولى',
         ];
@@ -225,7 +237,10 @@ class DocumentController extends Controller
                 $user
             );
 
-            $document->forceFill(['direction' => $direction])->save();
+            $document->forceFill([
+                'direction' => $direction,
+                'status' => 'pending',
+            ])->save();
 
             if ($comment !== '') {
                 $document->comments()->create(['user_id' => $user->id, 'body' => $comment]);
@@ -240,7 +255,7 @@ class DocumentController extends Controller
                         [
                             'department_id' => $block['department_id'],
                             'sent_by' => $user->id,
-                            'priority' => (int) $recipient->order_num,
+                            'priority' => (int) ($recipient->order_num ?? 0),
                             'status' => 'pending',
                         ]
                     );
@@ -266,7 +281,7 @@ class DocumentController extends Controller
             return $document;
         });
 
-        return redirect()->route('documents.show', $document->id)->with('success', 'تم حفظ وأرشفة المستند بنجاح.');
+        return redirect()->route('documents.show', $document->id)->with('success', 'تم حفظ وأرشفة المستند بنجاح (الحالة: قيد الإجراء).');
     }
 
     public function show(Request $request, Document $document): Response
@@ -294,9 +309,20 @@ class DocumentController extends Controller
             'auditLogs' => fn($q) => $q->with('user')->latest('id')->take(20),
         ]);
 
-        $forwardableUsers = $this->canForward($user, $document)
+        $canUserAct = $this->canForward($user, $document);
+
+        $forwardableUsers = $canUserAct
             ? $this->forwardableUsers($user, $document)
             : collect();
+
+        $allDepartments = Department::query()
+            ->with(['users' => function ($q) {
+                $q->where('status', 'active')
+                    ->orderBy('order_num')
+                    ->select('id', 'name', 'department_id', 'order_num');
+            }])
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         $shareableUsers = $user->isSuperAdmin()
             ? User::where('id', '!=', $user->id)->where('status', 'active')->with('department')
@@ -307,13 +333,18 @@ class DocumentController extends Controller
             'document' => $document,
             'shareableUsers' => $shareableUsers,
             'forwardableUsers' => $forwardableUsers,
+            'recipientDepartments' => $allDepartments,
+            'userSignatureUrl' => $user->signature_path ? Storage::disk('public')->url($user->signature_path) : null,
+            'hasSignature' => !empty($user->signature_path),
             'can' => [
                 'update' => $user->can('update', $document),
                 'delete' => $user->can('delete', $document),
                 'download' => $user->can('download', $document),
                 'addVersion' => $user->can('addVersion', $document),
                 'share' => $user->can('share', $document),
-                'forward' => $forwardableUsers->isNotEmpty(),
+                'forward' => $canUserAct,
+                'sign' => $canUserAct,
+                'updateStatus' => $canUserAct,
             ],
         ]);
     }
@@ -334,6 +365,9 @@ class DocumentController extends Controller
         return back()->with('success', 'تم إضافة التعليق.');
     }
 
+    /**
+     * تحويل المستند بين الأقسام وسلسلة التحويلات
+     */
     public function forward(Request $request, Document $document): RedirectResponse
     {
         $user = $request->user();
@@ -342,58 +376,180 @@ class DocumentController extends Controller
         abort_unless($this->canForward($user, $document), 403, 'غير مصرح لك بتحويل هذا المستند.');
 
         $validated = $request->validate([
-            'user_ids' => ['required', 'array', 'min:1'],
-            'user_ids.*' => ['integer', 'distinct'],
-            'note' => ['nullable', 'string', 'max:1000'],
+            'department_id' => ['required', 'exists:departments,id'],
+            'user_ids'      => ['nullable', 'array'],
+            'user_ids.*'    => ['integer', 'exists:users,id'],
+            'note'          => ['nullable', 'string', 'max:1000'],
         ], [
-            'user_ids.required' => 'اختر موظفاً واحداً على الأقل.',
-            'user_ids.min' => 'اختر موظفاً واحداً على الأقل.',
+            'department_id.required' => 'اختر القسم المراد التحويل إليه.',
+            'department_id.exists'   => 'القسم المختار غير موجود.',
         ]);
 
-        $allowed = $this->forwardableUsers($user, $document)->keyBy('id');
+        $targetDept = Department::findOrFail($validated['department_id']);
 
-        foreach ($validated['user_ids'] as $id) {
-            if (!$allowed->has((int) $id)) {
-                return back()->withErrors([
-                    'user_ids' => 'لا يمكنك التحويل إلا لموظفين أقل منك في الترتيب داخل قسمك.',
-                ]);
-            }
+        $targetsQuery = User::where('department_id', $targetDept->id)->where('status', 'active');
+        if (!empty($validated['user_ids'])) {
+            $targetsQuery->whereIn('id', $validated['user_ids']);
+        }
+        $targets = $targetsQuery->get();
+
+        if ($targets->isEmpty()) {
+            return back()->withErrors(['department_id' => 'لا يوجد موظفون متاحون في هذا القسم حالياً.']);
         }
 
-        $targets = collect($validated['user_ids'])->map(fn($id) => $allowed[(int) $id]);
-
-        DB::transaction(function () use ($targets, $document, $user, $validated) {
+        DB::transaction(function () use ($targets, $targetDept, $document, $user, $validated) {
             foreach ($targets as $target) {
-                DocumentRecipient::create([
-                    'document_id' => $document->id,
-                    'user_id' => $target->id,
-                    'department_id' => $target->department_id,
-                    'sent_by' => $user->id,
-                    'priority' => (int) $target->order_num,
-                    'status' => 'pending',
-                ]);
+                DocumentRecipient::updateOrCreate(
+                    ['document_id' => $document->id, 'user_id' => $target->id],
+                    [
+                        'department_id' => $targetDept->id,
+                        'sent_by'       => $user->id,
+                        'priority'      => (int) ($target->order_num ?? 0),
+                        'status'        => 'pending',
+                    ]
+                );
 
-                // صلاحية مشاهدة فقط
                 DocumentAccess::firstOrCreate(
                     ['document_id' => $document->id, 'user_id' => $target->id],
                     ['access_level' => 'view']
                 );
             }
 
+            // علّم حالة المستلم الحالي كمقروءة لو كانت معلقة
+            DocumentRecipient::where('document_id', $document->id)
+                ->where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'read', 'read_at' => now()]);
+
             $note = trim((string) ($validated['note'] ?? ''));
+            $names = $targets->pluck('name')->implode('، ');
+            $body = "تحويل إلى قسم ({$targetDept->name}) - الموظفون: {$names}";
             if ($note !== '') {
-                $document->comments()->create([
-                    'user_id' => $user->id,
-                    'body' => 'تحويل إلى ' . $targets->pluck('name')->implode('، ') . ': ' . $note,
-                ]);
+                $body .= "\nملاحظات: " . $note;
             }
 
+            $document->comments()->create([
+                'user_id' => $user->id,
+                'body' => $body,
+            ]);
+
             AuditService::log('forward', $document, [
-                'forwarded_to' => $targets->pluck('name')->all(),
+                'from_department'   => $user->department?->name ?? 'العام',
+                'target_department' => $targetDept->name,
+                'forwarded_to'      => $targets->pluck('name')->all(),
+                'note'              => $note ?: null,
             ], $user);
         });
 
-        return back()->with('success', 'تم تحويل المستند بنجاح.');
+        return back()->with('success', "تم تحويل المستند إلى قسم ({$targetDept->name}) بنجاح.");
+    }
+
+    /**
+     * تحديث حالة المستند بين pending و finish
+     */
+    public function updateStatus(Request $request, Document $document): RedirectResponse
+    {
+        $user = $request->user();
+        Gate::authorize('view', $document);
+
+        abort_unless($this->canForward($user, $document), 403, 'غير مصرح لك بتغيير حالة هذا المستند.');
+
+        $validated = $request->validate([
+            'status' => ['required', 'in:pending,finish'],
+        ]);
+
+        $oldStatus = $document->status;
+        $newStatus = $validated['status'];
+
+        $document->update(['status' => $newStatus]);
+
+        $statusArabic = $newStatus === 'finish' ? 'مكتمل (Finish)' : 'قيد الإجراء (Pending)';
+
+        $document->comments()->create([
+            'user_id' => $user->id,
+            'body' => "تم تغيير حالة المعاملة إلى: {$statusArabic}",
+        ]);
+
+        AuditService::log('update_status', $document, [
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+        ], $user);
+
+        return back()->with('success', "تم تحديث حالة المستند إلى \"{$statusArabic}\" بنجاح.");
+    }
+
+    /**
+     * توقيع المستند إلكترونياً وحفظه كإصدار جديد معتمد
+     */
+    public function sign(Request $request, Document $document): RedirectResponse
+    {
+        $user = $request->user();
+        Gate::authorize('view', $document);
+
+        abort_unless($this->canForward($user, $document), 403, 'غير مصرح لك بتوقيع هذا المستند.');
+
+        $validated = $request->validate([
+            'file'           => ['required', 'file', 'max:51200'],
+            'mark_as_finish' => ['nullable', 'boolean'],
+            'note'           => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $file = $request->file('file');
+        $nextVersionNo = ((int) $document->versions()->max('version_no')) + 1;
+
+        $path = $file->store('documents', 'local');
+        $fileHash = hash_file('sha256', $file->getRealPath());
+
+        $note = trim((string) ($validated['note'] ?? ''));
+        $versionNotes = "نسخة معتمدة وموقعة إلكترونياً بواسطة: {$user->name}";
+        if ($note !== '') {
+            $versionNotes .= " - {$note}";
+        }
+
+        DB::transaction(function () use ($document, $nextVersionNo, $path, $file, $fileHash, $versionNotes, $user, $request, $note) {
+            $document->versions()->create([
+                'version_no'    => $nextVersionNo,
+                'file_path'     => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'file_size'     => $file->getSize(),
+                'mime_type'     => $file->getClientMimeType() ?: 'application/octet-stream',
+                'file_hash'     => $fileHash,
+                'change_notes'  => $versionNotes,
+                'uploaded_by'   => $user->id,
+            ]);
+
+            if ($request->boolean('mark_as_finish')) {
+                $document->update(['status' => 'finish']);
+            }
+
+            // تحديث حالة القراءة للمستخدم الحالي
+            DocumentRecipient::where('document_id', $document->id)
+                ->where('user_id', $user->id)
+                ->update(['status' => 'read', 'read_at' => now()]);
+
+            $commentText = "قام {$user->name} بتوقيع واعتماد المستند إلكترونياً (الإصدار v{$nextVersionNo})";
+            if ($request->boolean('mark_as_finish')) {
+                $commentText .= " وتم إنهاء المعاملة وحفظها كمكتملة.";
+            }
+            if ($note !== '') {
+                $commentText .= "\nملاحظات: " . $note;
+            }
+
+            $document->comments()->create([
+                'user_id' => $user->id,
+                'body' => $commentText,
+            ]);
+
+            AuditService::log('sign', $document, [
+                'version'   => $nextVersionNo,
+                'signed_by' => $user->name,
+                'status'    => $document->status,
+                'note'      => $note ?: null,
+            ], $user);
+        });
+
+        return redirect()->route('documents.show', $document->id)
+            ->with('success', "تم توقيع وحفظ المستند بنجاح كإصدار جديد معتمد (v{$nextVersionNo}).");
     }
 
     public function update(Request $request, Document $document): RedirectResponse
@@ -402,26 +558,27 @@ class DocumentController extends Controller
         Gate::authorize('update', $document);
 
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title'        => ['required', 'string', 'max:255'],
             'reference_no' => ['required', 'string', 'max:100', 'unique:documents,reference_no,' . $document->id],
-            'doc_date' => ['required', 'date'],
-            'direction' => ['nullable', 'in:incoming,outgoing'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'status' => ['required', 'in:active,archived,draft'],
+            'doc_date'     => ['required', 'date'],
+            'direction'    => ['nullable', 'in:incoming,outgoing'],
+            'category_id'  => ['required', 'exists:categories,id'],
+            'status'       => ['required', 'in:active,archived,draft,pending,finish'],
         ]);
 
         $document->update([
-            'title' => $validated['title'],
+            'title'        => $validated['title'],
             'reference_no' => $validated['reference_no'],
-            'doc_date' => $validated['doc_date'],
-            'direction' => $validated['direction'] ?? $document->direction,
-            'category_id' => $validated['category_id'],
-            'status' => $validated['status'],
+            'doc_date'     => $validated['doc_date'],
+            'direction'    => $validated['direction'] ?? $document->direction,
+            'category_id'  => $validated['category_id'],
+            'status'       => $validated['status'],
         ]);
 
         AuditService::log('edit_metadata', $document, [
-            'title' => $document->title,
+            'title'        => $document->title,
             'reference_no' => $document->reference_no,
+            'status'       => $document->status,
         ], $user);
 
         return back()->with('success', 'تم تحديث بيانات المستند بنجاح.');
@@ -433,7 +590,7 @@ class DocumentController extends Controller
         Gate::authorize('delete', $document);
 
         AuditService::log('delete', $document, [
-            'title' => $document->title,
+            'title'        => $document->title,
             'reference_no' => $document->reference_no,
         ], $user);
 

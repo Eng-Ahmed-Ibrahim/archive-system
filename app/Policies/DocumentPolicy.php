@@ -24,6 +24,21 @@ class DocumentPolicy
             return true;
         }
 
+        // Uploader can always view
+        if ((int) $document->uploaded_by === (int) $user->id) {
+            return true;
+        }
+
+        // Recipient can always view
+        if ($document->recipients()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        // Shared directly with user
+        if ($document->accessList()->where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
         if (!$user->hasPermission('documents.view')) {
             return false;
         }
@@ -33,8 +48,7 @@ class DocumentPolicy
             return true;
         }
 
-        // Shared directly with user
-        return $document->accessList()->where('user_id', $user->id)->exists();
+        return false;
     }
 
     /**

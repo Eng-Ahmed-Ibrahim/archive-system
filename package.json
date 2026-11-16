@@ -21,6 +21,8 @@
         "concurrently": "^10.0.3",
         "laravel-vite-plugin": "^3.1",
         "lucide-react": "^1.70.0",
+        "pdf-lib": "^1.17.1",
+        "pdfjs-dist": "^6.5.438",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-signature-canvas": "^1.1.0-alpha.2",

@@ -68,7 +68,7 @@ export interface DocumentItem {
     category_id: number;
     department_id: number;
     uploaded_by: number;
-    status: 'active' | 'archived' | 'draft';
+    status: 'pending' | 'finish' | 'active' | 'archived' | 'draft';
     deleted_at?: string | null;
     created_at: string;
     updated_at: string;
@@ -106,6 +106,9 @@ export interface User {
     role_names?: string[];
     is_admin?: boolean;
     permissions?: string[];
+    order_num?: number | null;
+    has_signature?: boolean;
+    signature_url?: string | null;
 }
 
 export interface DemoUser {

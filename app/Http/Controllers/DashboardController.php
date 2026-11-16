@@ -20,6 +20,8 @@ class DashboardController extends Controller
             'incoming' => Document::accessibleBy($user)->where('direction', 'incoming')->count(),
             'outgoing' => Document::accessibleBy($user)->where('direction', 'outgoing')->count(),
             'today' => Document::accessibleBy($user)->whereDate('created_at', today())->count(),
+            'pending' => Document::accessibleBy($user)->where('status', 'pending')->count(),
+            'finish' => Document::accessibleBy($user)->where('status', 'finish')->count(),
             'unread' => DocumentRecipient::where('user_id', $user->id)
                 ->where('status', 'pending')
                 ->whereHas('document')

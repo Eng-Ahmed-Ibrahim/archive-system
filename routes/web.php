@@ -9,6 +9,7 @@ use App\Http\Controllers\DocumentAccessController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentFileController;
 use App\Http\Controllers\DocumentVersionController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -74,8 +75,15 @@ Route::middleware('auth')->group(function () {
 
     // Audit Logs
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
-Route::post('documents/{document}/comments', [DocumentController::class, 'comment'])->name('documents.comments.store');
-Route::post('documents/{document}/forward', [DocumentController::class, 'forward'])->name('documents.forward');
+    Route::post('documents/{document}/comments', [DocumentController::class, 'comment'])->name('documents.comments.store');
+    Route::post('documents/{document}/forward', [DocumentController::class, 'forward'])->name('documents.forward');
+    Route::post('documents/{document}/status', [DocumentController::class, 'updateStatus'])->name('documents.status.update');
+    Route::post('documents/{document}/sign', [DocumentController::class, 'sign'])->name('documents.sign');
+
+    // Profile & Signature
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/signature', [ProfileController::class, 'updateSignature'])->name('profile.signature.update');
+    Route::delete('/profile/signature', [ProfileController::class, 'destroySignature'])->name('profile.signature.destroy');
 
     Route::resource('subjects', SubjectController::class)
         ->only(['index', 'store', 'update', 'destroy']);

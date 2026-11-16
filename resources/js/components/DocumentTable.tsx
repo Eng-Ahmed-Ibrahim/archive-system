@@ -1,6 +1,8 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Calendar,
+    CheckCircle2,
+    Clock,
     Download,
     Eye,
     FileCheck,
@@ -101,11 +103,22 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                             >
                                                 {doc.title}
                                             </Link>
-                                            <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                                            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
                                                 <span className="flex items-center gap-0.5 font-mono text-cyan-400/90 bg-cyan-950/40 px-1.5 py-0.2 rounded border border-cyan-800/40">
                                                     <Hash className="w-2.5 h-2.5" />
                                                     {doc.reference_no}
                                                 </span>
+                                                {doc.status === 'finish' ? (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-950/70 text-emerald-300 border border-emerald-800/50 font-semibold">
+                                                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                                                        مكتمل
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded-full bg-amber-950/70 text-amber-300 border border-amber-800/50 font-semibold">
+                                                        <Clock className="w-2.5 h-2.5 text-amber-400" />
+                                                        قيد الإجراء
+                                                    </span>
+                                                )}
                                                 {doc.tags && doc.tags.length > 0 && (
                                                     <div className="hidden sm:flex items-center gap-1">
                                                         {doc.tags.slice(0, 2).map((t) => (
