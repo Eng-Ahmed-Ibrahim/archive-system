@@ -32,7 +32,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
     const getFileIcon = (mimeType?: string) => {
         if (!mimeType) return <FileText className="w-5 h-5 text-indigo-400" />;
         if (mimeType.includes('pdf')) return <FileText className="w-5 h-5 text-rose-400" />;
-        if (mimeType.includes('image') || mimeType.includes('svg')) return <Image className="w-5 h-5 text-emerald-400" />;
+        if (mimeType.includes('image') || mimeType.includes('svg')) return <Image className="w-5 h-5 text-emerald-600" />;
         if (mimeType.includes('sheet') || mimeType.includes('excel')) return <FileSpreadsheet className="w-5 h-5 text-teal-400" />;
         return <FileCode className="w-5 h-5 text-indigo-400" />;
     };
@@ -48,9 +48,9 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
 
     if (documents.length === 0) {
         return (
-            <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-12 text-center">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/40 p-12 text-center">
                 <FileText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-slate-300">لا توجد مستندات مطابقة</h3>
+                <h3 className="text-base font-semibold text-slate-700">لا توجد مستندات مطابقة</h3>
                 <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
                     لم يتم العثور على مستندات في هذا القسم أو المجلد، أو لا تطابق معايير البحث الحالية.
                 </p>
@@ -67,10 +67,10 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
     }
 
     return (
-        <div className="overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-900/60 shadow-xl">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/60 shadow-xl">
             <table className="w-full text-right text-xs">
                 <thead>
-                    <tr className="border-b border-slate-800 text-slate-400 font-semibold bg-slate-900/80">
+                    <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-white/80">
                         <th className="py-3 px-4">المستند والرقم المرجعي</th>
                         <th className="py-3 px-3">التصنيف والنوع</th>
                         {showDepartment && <th className="py-3 px-3">القسم</th>}
@@ -87,35 +87,35 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                         return (
                             <tr
                                 key={doc.id}
-                                className={`hover:bg-slate-800/40 transition-colors group ${isDeleting ? 'opacity-40 pointer-events-none' : ''
+                                className={`hover:bg-slate-100/40 transition-colors group ${isDeleting ? 'opacity-40 pointer-events-none' : ''
                                     }`}
                             >
                                 {/* Document Title & Ref */}
                                 <td className="py-3.5 px-4">
                                     <div className="flex items-start gap-3">
-                                        <div className="p-2 rounded-xl bg-slate-800 border border-slate-700/60 shrink-0 group-hover:border-indigo-500/50 transition-colors">
+                                        <div className="p-2 rounded-xl bg-slate-100 border border-slate-300/60 shrink-0 group-hover:border-indigo-500/50 transition-colors">
                                             {getFileIcon(version?.mime_type)}
                                         </div>
                                         <div className="space-y-1">
                                             <Link
                                                 href={`/documents/${doc.id}`}
-                                                className="font-bold text-slate-100 hover:text-indigo-400 transition-colors text-xs sm:text-sm line-clamp-1"
+                                                className="font-bold text-slate-900 hover:text-indigo-400 transition-colors text-xs sm:text-sm line-clamp-1"
                                             >
                                                 {doc.title}
                                             </Link>
-                                            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
-                                                <span className="flex items-center gap-0.5 font-mono text-cyan-400/90 bg-cyan-950/40 px-1.5 py-0.2 rounded border border-cyan-800/40">
+                                            <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
+                                                <span className="flex items-center gap-0.5 font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">
                                                     <Hash className="w-2.5 h-2.5" />
                                                     {doc.reference_no}
                                                 </span>
                                                 {doc.status === 'finish' ? (
-                                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-950/70 text-emerald-300 border border-emerald-800/50 font-semibold">
-                                                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+                                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-50/70 text-emerald-800 border border-emerald-200 font-semibold">
+                                                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
                                                         مكتمل
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded-full bg-amber-950/70 text-amber-300 border border-amber-800/50 font-semibold">
-                                                        <Clock className="w-2.5 h-2.5 text-amber-400" />
+                                                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded-full bg-amber-50/70 text-amber-800 border border-indigo-200 font-semibold">
+                                                        <Clock className="w-2.5 h-2.5 text-amber-600" />
                                                         قيد الإجراء
                                                     </span>
                                                 )}
@@ -124,7 +124,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                                         {doc.tags.slice(0, 2).map((t) => (
                                                             <span
                                                                 key={t.id}
-                                                                className="text-[10px] bg-slate-800 px-1.5 py-0.2 rounded text-slate-300"
+                                                                className="text-[10px] bg-slate-100 px-1.5 py-0.2 rounded text-slate-700"
                                                             >
                                                                 #{t.name}
                                                             </span>
@@ -139,12 +139,12 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                 {/* Category & Type */}
                                 <td className="py-3.5 px-3">
                                     <div className="space-y-1">
-                                        <div className="flex items-center gap-1 text-slate-300 font-medium truncate max-w-[160px]">
-                                            <Folder className="w-3 h-3 text-amber-400 shrink-0" />
+                                        <div className="flex items-center gap-1 text-slate-700 font-medium truncate max-w-[160px]">
+                                            <Folder className="w-3 h-3 text-amber-600 shrink-0" />
                                             <span>{doc.category?.name || 'غير مصنف'}</span>
                                         </div>
                                         {doc.type && (
-                                            <span className="inline-block text-[10px] px-1.5 py-0.2 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-800/40">
+                                            <span className="inline-block text-[10px] px-1.5 py-0.2 rounded bg-indigo-950/60 text-indigo-700 border border-indigo-800/40">
                                                 {doc.type.name}
                                             </span>
                                         )}
@@ -154,7 +154,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                 {/* Department */}
                                 {showDepartment && (
                                     <td className="py-3.5 px-3">
-                                        <span className="text-[11px] font-medium text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60 inline-block">
+                                        <span className="text-[11px] font-medium text-slate-700 bg-slate-100/80 px-2 py-0.5 rounded-md border border-slate-300/60 inline-block">
                                             {doc.department?.name || 'عام'}
                                         </span>
                                     </td>
@@ -162,7 +162,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
 
                                 {/* Date */}
                                 <td className="py-3.5 px-3">
-                                    <div className="flex items-center gap-1 text-slate-400 text-[11px]">
+                                    <div className="flex items-center gap-1 text-slate-500 text-[11px]">
                                         <Calendar className="w-3 h-3" />
                                         <span>{doc.doc_date}</span>
                                     </div>
@@ -175,7 +175,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                             <Layers className="w-3 h-3 text-cyan-400" />
                                             <span>v{version?.version_no || 1}</span>
                                         </div>
-                                        <div className="text-[10px] text-slate-400 font-mono">
+                                        <div className="text-[10px] text-slate-500 font-mono">
                                             {version?.formatted_size || (version?.file_size ? `${Math.round(version.file_size / 1024)} KB` : '-')}
                                         </div>
                                     </div>
@@ -188,7 +188,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                             <button
                                                 type="button"
                                                 onClick={() => onPreview(doc)}
-                                                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                                className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-indigo-900 hover:bg-slate-200 transition-colors"
                                                 title="معاينة سريعة للملف"
                                             >
                                                 <Eye className="w-3.5 h-3.5" />
@@ -197,7 +197,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
 
                                         <a
                                             href={`/documents/${doc.id}/download`}
-                                            className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-cyan-300 hover:bg-slate-700 transition-colors"
+                                            className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:text-cyan-300 hover:bg-slate-200 transition-colors"
                                             title="تحميل الملف"
                                             download
                                         >
@@ -206,7 +206,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
 
                                         <Link
                                             href={`/documents/${doc.id}`}
-                                            className="p-1.5 rounded-lg bg-indigo-900/50 text-indigo-300 hover:bg-indigo-800 hover:text-white transition-colors"
+                                            className="p-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-900 transition-colors"
                                             title="تفاصيل المستند والإصدارات"
                                         >
                                             <FileCheck className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ export default function DocumentTable({ documents, onPreview, showDepartment = t
                                             <button
                                                 type="button"
                                                 onClick={() => handleDelete(doc)}
-                                                className="p-1.5 rounded-lg bg-slate-800/80 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 transition-colors"
+                                                className="p-1.5 rounded-lg bg-slate-100/80 text-slate-500 hover:text-rose-400 hover:bg-rose-950/50 transition-colors"
                                                 title="حذف المستند"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />

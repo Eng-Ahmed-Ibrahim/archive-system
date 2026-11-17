@@ -175,7 +175,7 @@ test('admin can create, update, and delete a user', function () {
 
     // Create user
     $response = $this->actingAs($admin)->post('/users', [
-        'name' => 'موظف جديد للاختبار',
+        'name' => 'عضو جديد للاختبار',
         'email' => 'newuser@archive.local',
         'password' => 'secret123',
         'department_id' => $dept->id,
@@ -192,7 +192,7 @@ test('admin can create, update, and delete a user', function () {
 
     // Update user
     $response = $this->actingAs($admin)->put("/users/{$newUser->id}", [
-        'name' => 'موظف معدل للاختبار',
+        'name' => 'عضو معدل للاختبار',
         'email' => 'newuser@archive.local',
         'department_id' => $dept->id,
         'role_id' => $role->id,
@@ -200,7 +200,7 @@ test('admin can create, update, and delete a user', function () {
         'order_num' => 51,
     ]);
     $response->assertRedirect();
-    expect($newUser->fresh()->name)->toBe('موظف معدل للاختبار');
+    expect($newUser->fresh()->name)->toBe('عضو معدل للاختبار');
     expect($newUser->fresh()->status)->toBe('inactive');
 
     // Delete user
@@ -243,7 +243,7 @@ test('inter-department forwarding and status pending vs finish workflow', functi
     $dept3 = Department::create(['name' => 'قسم المالية']);
 
     $userDept2 = User::create([
-        'name' => 'موظف القانونية',
+        'name' => 'عضو القانونية',
         'email' => 'legal@archive.local',
         'password' => 'secret123',
         'department_id' => $dept2->id,
@@ -252,7 +252,7 @@ test('inter-department forwarding and status pending vs finish workflow', functi
     ]);
 
     $userDept3 = User::create([
-        'name' => 'موظف المالية',
+        'name' => 'عضو المالية',
         'email' => 'finance@archive.local',
         'password' => 'secret123',
         'department_id' => $dept3->id,

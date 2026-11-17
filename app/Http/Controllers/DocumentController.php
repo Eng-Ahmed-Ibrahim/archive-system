@@ -193,8 +193,8 @@ class DocumentController extends Controller
             'recipients.*.user_ids' => ['required', 'array', 'min:1'],
             'recipients.*.user_ids.*' => ['integer', 'distinct', 'exists:users,id'],
         ], [
-            'recipients.*.user_ids.required' => 'اختر موظفاً واحداً على الأقل في كل قسم.',
-            'recipients.*.user_ids.min' => 'اختر موظفاً واحداً على الأقل في كل قسم.',
+            'recipients.*.user_ids.required' => 'اختر عضواً واحداً على الأقل في كل قسم.',
+            'recipients.*.user_ids.min' => 'اختر عضواً واحداً على الأقل في كل قسم.',
             'recipients.*.department_id.required' => 'اختر القسم.',
             'recipients.*.department_id.distinct' => 'القسم مكرر.',
             'subject_id.required' => 'اختر موضوع المستند.',
@@ -213,7 +213,7 @@ class DocumentController extends Controller
 
             if ($validCount !== count($block['user_ids'])) {
                 return back()->withErrors([
-                    "recipients.{$i}.user_ids" => 'يوجد موظف غير تابع للقسم المختار أو غير نشط.',
+                    "recipients.{$i}.user_ids" => 'يوجد عضو غير تابع للقسم المختار أو غير نشط.',
                 ])->withInput();
             }
         }
@@ -394,7 +394,7 @@ class DocumentController extends Controller
         $targets = $targetsQuery->get();
 
         if ($targets->isEmpty()) {
-            return back()->withErrors(['department_id' => 'لا يوجد موظفون متاحون في هذا القسم حالياً.']);
+            return back()->withErrors(['department_id' => 'لا يوجد عضوون متاحون في هذا القسم حالياً.']);
         }
 
         DB::transaction(function () use ($targets, $targetDept, $document, $user, $validated) {
@@ -423,7 +423,7 @@ class DocumentController extends Controller
 
             $note = trim((string) ($validated['note'] ?? ''));
             $names = $targets->pluck('name')->implode('، ');
-            $body = "تحويل إلى قسم ({$targetDept->name}) - الموظفون: {$names}";
+            $body = "تحويل إلى قسم ({$targetDept->name}) - العضوون: {$names}";
             if ($note !== '') {
                 $body .= "\nملاحظات: " . $note;
             }

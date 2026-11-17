@@ -127,37 +127,36 @@ export default function ProfileIndex({ profileUser }: Props) {
     };
 
     return (
-        <AppLayout title="الملف الشخصي والتوقيع الإلكتروني">
-            <Head title="الملف الشخصي والتوقيع الإلكتروني - سيستم الأرشيف" />
+        <AppLayout title="الملف الشخصي  ">
 
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Header banner */}
-                <div className="rounded-2xl bg-gradient-to-r from-indigo-900/60 via-slate-900 to-slate-900 border border-slate-800 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+                <div className="rounded-2xl bg-gradient-to-r from-indigo-50 via-white to-white border border-slate-200 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-indigo-500/20">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-indigo-500/20">
                             {profileUser.name.charAt(0)}
                         </div>
                         <div className="space-y-1">
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                 {profileUser.name}
                                 {profileUser.order_num && (
-                                    <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-800/60 font-mono">
+                                    <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">
                                         ترتيب: #{profileUser.order_num}
                                     </span>
                                 )}
                             </h2>
-                            <p className="text-xs text-slate-400 font-mono">{profileUser.email}</p>
+                            <p className="text-xs text-slate-500 font-mono">{profileUser.email}</p>
                             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                                    <Building2 className="w-3 h-3 text-indigo-400" />
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                    <Building2 className="w-3 h-3 text-indigo-600" />
                                     {profileUser.department}
                                 </span>
                                 {profileUser.roles.map((r, i) => (
                                     <span
                                         key={i}
-                                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-950/70 text-indigo-300 border border-indigo-800/40 font-semibold"
+                                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold"
                                     >
-                                        <Shield className="w-3 h-3" />
+                                        <Shield className="w-3 h-3 text-indigo-600" />
                                         {r}
                                     </span>
                                 ))}
@@ -167,13 +166,13 @@ export default function ProfileIndex({ profileUser }: Props) {
 
                     <div className="flex items-center gap-2">
                         {profileUser.has_signature ? (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-800/50 text-emerald-300 text-xs font-semibold">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                                 <span>التوقيع الإلكتروني مفعّل ومحفوظ</span>
                             </div>
                         ) : (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-800/50 text-amber-300 text-xs font-semibold">
-                                <AlertCircle className="w-4 h-4 text-amber-400" />
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
+                                <AlertCircle className="w-4 h-4 text-amber-600" />
                                 <span>لم يتم تسجيل توقيع إلكتروني بعد</span>
                             </div>
                         )}
@@ -184,39 +183,39 @@ export default function ProfileIndex({ profileUser }: Props) {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* User Info Column */}
                     <div className="lg:col-span-4 space-y-6">
-                        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl space-y-4">
-                            <h3 className="text-sm font-bold text-white flex items-center gap-2 pb-3 border-b border-slate-800">
-                                <UserIcon className="w-4 h-4 text-indigo-400" />
+                        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-200">
+                                <UserIcon className="w-4 h-4 text-indigo-600" />
                                 معلومات الحساب
                             </h3>
 
                             <div className="space-y-3 text-xs">
                                 <div>
-                                    <span className="text-slate-400 block mb-0.5">الاسم بالكامل</span>
-                                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 font-semibold">
+                                    <span className="text-slate-500 block mb-0.5">الاسم بالكامل</span>
+                                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold">
                                         {profileUser.name}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <span className="text-slate-400 block mb-0.5">البريد الإلكتروني</span>
-                                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 font-mono">
+                                    <span className="text-slate-500 block mb-0.5">البريد الإلكتروني</span>
+                                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-mono">
                                         {profileUser.email}
                                     </div>
                                 </div>
 
                                 <div>
-                                    <span className="text-slate-400 block mb-0.5">القسم التابع له</span>
-                                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 flex items-center gap-1.5 font-medium">
-                                        <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                                    <span className="text-slate-500 block mb-0.5">القسم التابع له</span>
+                                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 flex items-center gap-1.5 font-medium">
+                                        <Building2 className="w-3.5 h-3.5 text-indigo-600" />
                                         {profileUser.department}
                                     </div>
                                 </div>
 
                                 {profileUser.order_num && (
                                     <div>
-                                        <span className="text-slate-400 block mb-0.5">الترتيب الوظيفي داخل القسم</span>
-                                        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-cyan-300 font-mono font-bold">
+                                        <span className="text-slate-500 block mb-0.5">الترتيب الوظيفي داخل القسم</span>
+                                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-indigo-700 font-mono font-bold">
                                             #{profileUser.order_num}
                                         </div>
                                     </div>
@@ -226,23 +225,23 @@ export default function ProfileIndex({ profileUser }: Props) {
 
                         {/* Current signature card */}
                         {profileUser.has_signature && profileUser.signature_url && (
-                            <div className="rounded-2xl border border-emerald-900/40 bg-emerald-950/20 p-5 shadow-xl space-y-3">
-                                <div className="flex items-center justify-between pb-2 border-b border-emerald-900/40">
-                                    <h4 className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm space-y-3">
+                                <div className="flex items-center justify-between pb-2 border-b border-emerald-200">
+                                    <h4 className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                                         توقيعك الحالي المعتمد
                                     </h4>
                                     <button
                                         type="button"
                                         onClick={handleDeleteCurrentSignature}
-                                        className="text-slate-400 hover:text-rose-400 p-1 rounded-lg transition-colors"
+                                        className="text-slate-400 hover:text-rose-600 p-1 rounded-lg transition-colors"
                                         title="حذف التوقيع الحالي"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
 
-                                <div className="p-4 bg-white rounded-xl shadow-inner flex items-center justify-center min-h-[120px] border border-slate-300/80">
+                                <div className="p-4 bg-white rounded-xl shadow-inner flex items-center justify-center min-h-[120px] border border-slate-200">
                                     <img
                                         src={profileUser.signature_url}
                                         alt="توقيعك الحالي"
@@ -250,7 +249,7 @@ export default function ProfileIndex({ profileUser }: Props) {
                                     />
                                 </div>
 
-                                <p className="text-[11px] text-slate-400 text-center">
+                                <p className="text-[11px] text-slate-500 text-center">
                                     هذا التوقيع يُستخدم لاعتماد المستندات المعاملة وتحويلها إلكترونياً.
                                 </p>
                             </div>
@@ -259,26 +258,26 @@ export default function ProfileIndex({ profileUser }: Props) {
 
                     {/* Signature Editor Column */}
                     <div className="lg:col-span-8">
-                        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6 shadow-xl space-y-5">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm space-y-5">
                             <div>
-                                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                                    <PenTool className="w-5 h-5 text-indigo-400" />
+                                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                                    <PenTool className="w-5 h-5 text-indigo-600" />
                                     {profileUser.has_signature ? 'تحديث أو استبدال التوقيع الإلكتروني' : 'تسجيل التوقيع الإلكتروني'}
                                 </h3>
-                                <p className="text-xs text-slate-400 mt-1">
+                                <p className="text-xs text-slate-500 mt-1">
                                     يمكنك رسم توقيعك مباشرة بالقلم على الشاشة أو رفع صورة التوقيع الشفافة (PNG).
                                 </p>
                             </div>
 
                             {/* Mode switcher tabs */}
-                            <div className="flex rounded-xl bg-slate-950 border border-slate-800 p-1 gap-1 text-xs font-semibold">
+                            <div className="flex rounded-xl bg-slate-100 border border-slate-200 p-1 gap-1 text-xs font-semibold">
                                 <button
                                     type="button"
                                     onClick={() => setMode('draw')}
                                     className={`flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all ${
                                         mode === 'draw'
-                                            ? 'bg-indigo-600 text-white shadow'
-                                            : 'text-slate-400 hover:text-slate-200'
+                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                            : 'text-slate-600 hover:text-slate-900'
                                     }`}
                                 >
                                     <PenTool className="w-4 h-4" />
@@ -289,8 +288,8 @@ export default function ProfileIndex({ profileUser }: Props) {
                                     onClick={() => setMode('upload')}
                                     className={`flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all ${
                                         mode === 'upload'
-                                            ? 'bg-indigo-600 text-white shadow'
-                                            : 'text-slate-400 hover:text-slate-200'
+                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                            : 'text-slate-600 hover:text-slate-900'
                                     }`}
                                 >
                                     <FileImage className="w-4 h-4" />
@@ -301,19 +300,19 @@ export default function ProfileIndex({ profileUser }: Props) {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 {mode === 'draw' ? (
                                     <div className="space-y-2">
-                                        <div className="flex items-center justify-between text-xs text-slate-400">
+                                        <div className="flex items-center justify-between text-xs text-slate-500">
                                             <span>ارسم توقيعك داخل المربع الأبيض أدناه:</span>
                                             <button
                                                 type="button"
                                                 onClick={handleClearCanvas}
-                                                className="flex items-center gap-1 text-rose-400 hover:text-rose-300 font-medium transition-colors"
+                                                className="flex items-center gap-1 text-rose-600 hover:text-rose-700 font-medium transition-colors"
                                             >
                                                 <Eraser className="w-3.5 h-3.5" />
                                                 <span>مسح اللوحة</span>
                                             </button>
                                         </div>
 
-                                        <div className="relative rounded-2xl border-2 border-dashed border-slate-700 bg-white p-2 shadow-inner overflow-hidden">
+                                        <div className="relative rounded-2xl border-2 border-dashed border-slate-300 bg-white p-2 shadow-inner overflow-hidden">
                                             <SignatureCanvas
                                                 ref={signatureRef}
                                                 penColor="#0f172a"
@@ -333,9 +332,9 @@ export default function ProfileIndex({ profileUser }: Props) {
                                 ) : (
                                     <div className="space-y-3">
                                         {!previewUrl ? (
-                                            <label className="flex flex-col items-center justify-center h-56 rounded-2xl border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-950 cursor-pointer p-6 transition-colors">
-                                                <UploadCloud className="w-10 h-10 text-indigo-400 mb-2" />
-                                                <span className="text-xs font-semibold text-slate-200">
+                                            <label className="flex flex-col items-center justify-center h-56 rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 cursor-pointer p-6 transition-colors">
+                                                <UploadCloud className="w-10 h-10 text-indigo-600 mb-2" />
+                                                <span className="text-xs font-semibold text-slate-700">
                                                     انقر لاختيار ملف التوقيع أو اسحبه هنا
                                                 </span>
                                                 <span className="text-[11px] text-slate-500 mt-1">
@@ -350,17 +349,17 @@ export default function ProfileIndex({ profileUser }: Props) {
                                             </label>
                                         ) : (
                                             <div className="space-y-2">
-                                                <div className="flex items-center justify-between text-xs text-slate-400">
+                                                <div className="flex items-center justify-between text-xs text-slate-500">
                                                     <span>معاينة الصورة المختارة:</span>
                                                     <button
                                                         type="button"
                                                         onClick={handleRemoveUploadedFile}
-                                                        className="text-rose-400 hover:text-rose-300 font-medium"
+                                                        className="text-rose-600 hover:text-rose-700 font-medium"
                                                     >
                                                         اختيار صورة أخرى
                                                     </button>
                                                 </div>
-                                                <div className="p-4 bg-white rounded-2xl border border-slate-300 flex items-center justify-center min-h-[180px]">
+                                                <div className="p-4 bg-white rounded-2xl border border-slate-200 flex items-center justify-center min-h-[180px]">
                                                     <img
                                                         src={previewUrl}
                                                         alt="معاينة التوقيع المرفوع"
@@ -373,14 +372,14 @@ export default function ProfileIndex({ profileUser }: Props) {
                                 )}
 
                                 {errors.signature && (
-                                    <p className="text-xs text-rose-400">{errors.signature}</p>
+                                    <p className="text-xs text-rose-600">{errors.signature}</p>
                                 )}
 
-                                <div className="flex items-center justify-end pt-3 border-t border-slate-800">
+                                <div className="flex items-center justify-end pt-3 border-t border-slate-200">
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
+                                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all disabled:opacity-50"
                                     >
                                         <Check className="w-4 h-4" />
                                         <span>{processing ? 'جارٍ حفظ التوقيع...' : 'حفظ واعتماد التوقيع'}</span>

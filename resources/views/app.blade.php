@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="h-full bg-slate-900 text-slate-100">
+<html lang="ar" dir="rtl" class="h-full bg-white text-slate-900">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">

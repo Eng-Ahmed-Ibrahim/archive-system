@@ -8,7 +8,31 @@
     --font-cairo: 'Cairo', system-ui, -apple-system, sans-serif;
     --font-sans: 'Cairo', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 }
+@font-face {
+    font-family: 'Cairo';
+    src: url('/fonts/Cairo.ttf') format('truetype'); /* تأكد من مطابقة اسم الملف وصيغته، مثل Cairo-Regular.ttf أو Cairo.ttf */
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+select ,input,textarea{
+    color: #000000 !important;
+}
 
+select option {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+}
+/* تعيين الخط كافتراضي لكل النصوص في الصفحة */
+body ,*{
+    font-family: 'Cairo', sans-serif;
+}
+th,td{
+    font-size: 17px;
+}
+nav a{
+    font-size: 19px;
+}
 /* Custom scrollbars */
 ::-webkit-scrollbar {
     width: 6px;

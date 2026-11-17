@@ -610,8 +610,8 @@ export default function DocumentShow({
     const tabs: { key: Tab; label: string }[] = [
         { key: 'meta', label: 'البيانات' },
         { key: 'comments', label: `التعليقات (${comments.length})` },
-        { key: 'recipients', label: `المسار (${recipients.length})` },
-        { key: 'versions', label: `الإصدارات (${document.versions?.length || 1})` },
+        { key: 'recipients', label: `تتبع (${recipients.length})` },
+        // { key: 'versions', label: `الإصدارات (${document.versions?.length || 1})` },
         ...(isAdmin ? [{ key: 'audit' as Tab, label: 'السجل' }] : []),
     ];
 
@@ -650,55 +650,55 @@ export default function DocumentShow({
             <Head title={`${document.title} - سيستم الأرشيف`} />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
                 <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <Link href="/documents" className="hover:text-indigo-400">
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Link href="/documents" className="hover:text-indigo-600 transition-colors">
                             الأرشيف
                         </Link>
                         <span>/</span>
                         <span>{document.department?.name || 'عام'}</span>
                         <span>/</span>
-                        <span className="text-slate-200">{document.category?.name}</span>
+                        <span className="text-slate-900 font-semibold">{document.category?.name}</span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2.5">
-                        <h2 className="text-lg sm:text-xl font-black text-white">{document.title}</h2>
+                        <h2 className="text-lg sm:text-xl font-black text-slate-900">{document.title}</h2>
 
                         {/* Status Badge (pending vs finish) */}
                         {isFinished ? (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-semibold shadow">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shadow-2xs">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>مكتمل (Finish)</span>
                             </span>
                         ) : (
-                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/60 font-semibold shadow">
-                                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold shadow-2xs">
+                                <Clock className="w-3.5 h-3.5 text-amber-600" />
                                 <span>قيد الإجراء (Pending)</span>
                             </span>
                         )}
 
                         {document.direction && (
                             <span
-                                className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-semibold ${
-                                    document.direction === 'incoming'
-                                        ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800/50'
-                                        : 'bg-amber-950/70 text-amber-300 border-amber-800/50'
-                                }`}
+                                className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full border font-semibold shadow-2xs ${document.direction === 'incoming'
+                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                                    }`}
                             >
                                 {document.direction === 'incoming' ? (
-                                    <ArrowDownToLine className="w-3 h-3" />
+                                    <ArrowDownToLine className="w-3 h-3 text-emerald-600" />
                                 ) : (
-                                    <ArrowUpFromLine className="w-3 h-3" />
+                                    <ArrowUpFromLine className="w-3 h-3 text-amber-600" />
                                 )}
                                 {document.direction === 'incoming' ? 'وارد' : 'صادر'}
                             </span>
                         )}
 
-                        <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800/50">
+                        <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200 font-semibold">
                             {document.reference_no}
                         </span>
-                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-semibold">
+
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-semibold">
                             v{latestVersion?.version_no || 1}
                         </span>
                     </div>
@@ -711,7 +711,7 @@ export default function DocumentShow({
                         <button
                             type="button"
                             onClick={() => setSignModalOpen(true)}
-                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 transition-colors"
+                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/20 transition-colors"
                         >
                             <PenTool className="w-4 h-4 text-purple-200" />
                             <span>توقيع المستند</span>
@@ -723,7 +723,7 @@ export default function DocumentShow({
                         <button
                             type="button"
                             onClick={() => setForwardModalOpen(true)}
-                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
+                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-colors"
                         >
                             <Send className="w-4 h-4" />
                             <span>تحويل لقسم</span>
@@ -737,20 +737,20 @@ export default function DocumentShow({
                                 <button
                                     type="button"
                                     onClick={() => handleToggleStatus('finish')}
-                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/70 text-emerald-300 text-xs font-semibold transition-colors shadow"
+                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-semibold transition-colors shadow-2xs"
                                     title="تعليم المستند كمكتمل ومنتهي"
                                 >
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                                     <span>إنهاء المعاملة</span>
                                 </button>
                             ) : (
                                 <button
                                     type="button"
                                     onClick={() => handleToggleStatus('pending')}
-                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-950 hover:bg-amber-900 border border-amber-700/70 text-amber-300 text-xs font-semibold transition-colors shadow"
+                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-semibold transition-colors shadow-2xs"
                                     title="إعادة فتح المعاملة"
                                 >
-                                    <RefreshCw className="w-4 h-4 text-amber-400" />
+                                    <RefreshCw className="w-4 h-4 text-amber-600" />
                                     <span>إعادة فتح</span>
                                 </button>
                             )}
@@ -761,9 +761,9 @@ export default function DocumentShow({
                         <a
                             href={`/documents/${document.id}/download`}
                             download
-                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold shadow transition-colors"
+                            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
                         >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-4 h-4 text-indigo-600" />
                             <span>تحميل</span>
                         </a>
                     )}
@@ -772,7 +772,7 @@ export default function DocumentShow({
                         <button
                             type="button"
                             onClick={handleDelete}
-                            className="p-2 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 transition-colors"
+                            className="p-2 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200 shadow-2xs transition-colors"
                             title="حذف المستند"
                         >
                             <Trash2 className="w-4 h-4" />
@@ -780,19 +780,18 @@ export default function DocumentShow({
                     )}
                 </div>
             </div>
-
             {/* Document Content & Details */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* Preview */}
-                <div className="lg:col-span-7 rounded-2xl border border-slate-800/80 bg-slate-900/60 shadow-xl overflow-hidden flex flex-col h-[700px]">
-                    <div className="px-4 py-3 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+                <div className="lg:col-span-7 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col h-[700px]">
+                    <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Eye className="w-4 h-4 text-indigo-400" />
-                            <span className="text-xs font-bold text-slate-200">
+                            <Eye className="w-4 h-4 text-indigo-600" />
+                            <span className="text-xs font-bold text-slate-800">
                                 معاينة الملف (v{currentVersion?.version_no || 1})
                             </span>
                             {currentVersion?.change_notes && (
-                                <span className="text-[11px] text-purple-300 bg-purple-950/60 border border-purple-800/40 px-2 py-0.5 rounded-md truncate max-w-xs">
+                                <span className="text-[11px] text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md truncate max-w-xs">
                                     {currentVersion.change_notes}
                                 </span>
                             )}
@@ -802,18 +801,18 @@ export default function DocumentShow({
                             href={previewUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[11px] text-slate-400 hover:text-white flex items-center gap-1"
+                            className="text-[11px] text-slate-500 hover:text-indigo-600 flex items-center gap-1 font-medium transition-colors"
                         >
                             <ExternalLink className="w-3.5 h-3.5" />
                             <span>نافذة كاملة</span>
                         </a>
                     </div>
 
-                    <div className="flex-1 bg-slate-950 flex items-center justify-center p-2 overflow-hidden">
+                    <div className="flex-1 bg-slate-100 flex items-center justify-center p-2 overflow-hidden">
                         {isPdf ? (
                             <iframe
                                 src={previewUrl}
-                                className="w-full h-full rounded-xl border border-slate-800 bg-white"
+                                className="w-full h-full rounded-xl border border-slate-200 bg-white"
                                 title={document.title}
                             />
                         ) : isImage ? (
@@ -821,19 +820,19 @@ export default function DocumentShow({
                                 <img
                                     src={previewUrl}
                                     alt={document.title}
-                                    className="max-h-full max-w-full object-contain rounded-lg shadow-xl border border-slate-800"
+                                    className="max-h-full max-w-full object-contain rounded-lg shadow-sm border border-slate-200 bg-white"
                                 />
                             </div>
                         ) : (
                             <div className="text-center p-8 space-y-3">
-                                <FileText className="w-12 h-12 text-slate-600 mx-auto" />
-                                <div className="text-xs font-semibold text-slate-300">
+                                <FileText className="w-12 h-12 text-slate-400 mx-auto" />
+                                <div className="text-xs font-semibold text-slate-700">
                                     المعاينة المباشرة غير مدعومة لهذا النوع من الملفات
                                 </div>
                                 {can.download && (
                                     <a
                                         href={`/documents/${document.id}/download`}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors"
                                         download
                                     >
                                         <Download className="w-4 h-4" />
@@ -846,18 +845,17 @@ export default function DocumentShow({
                 </div>
 
                 {/* Tabs */}
-                <div className="lg:col-span-5 rounded-2xl border border-slate-800/80 bg-slate-900/60 shadow-xl overflow-hidden flex flex-col">
-                    <div className="flex border-b border-slate-800 bg-slate-900/90 text-xs font-semibold overflow-x-auto">
+                <div className="lg:col-span-5 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
+                    <div className="flex border-b border-slate-200 bg-slate-50 text-xs font-semibold overflow-x-auto">
                         {tabs.map((t) => (
                             <button
                                 key={t.key}
                                 type="button"
                                 onClick={() => setActiveTab(t.key)}
-                                className={`flex-1 whitespace-nowrap px-3 py-3 text-center transition-colors border-b-2 ${
-                                    activeTab === t.key
-                                        ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
-                                        : 'border-transparent text-slate-400 hover:text-slate-200'
-                                }`}
+                                className={`flex-1 whitespace-nowrap px-3 py-3 text-center transition-colors border-b-2 ${activeTab === t.key
+                                    ? 'border-indigo-600 text-indigo-700 bg-indigo-50/60 font-bold'
+                                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                                    }`}
                             >
                                 {t.label}
                             </button>
@@ -866,73 +864,72 @@ export default function DocumentShow({
 
                     {/* Meta Tab */}
                     {activeTab === 'meta' && (
-                        <div className="p-5 divide-y divide-slate-800/80 text-xs">
+                        <div className="p-5 divide-y divide-slate-100 text-xs">
                             <div className="py-2.5 flex items-center justify-between">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
                                     حالة المعاملة:
                                 </span>
                                 <span
-                                    className={`font-semibold px-2.5 py-0.5 rounded-full text-[11px] ${
-                                        isFinished
-                                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/50'
-                                            : 'bg-amber-950 text-amber-300 border border-amber-800/50'
-                                    }`}
+                                    className={`font-semibold px-2.5 py-0.5 rounded-full text-[11px] ${isFinished
+                                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                        : 'bg-amber-50 text-amber-800 border border-amber-200'
+                                        }`}
                                 >
                                     {isFinished ? 'مكتمل (Finish)' : 'قيد الإجراء (Pending)'}
                                 </span>
                             </div>
 
                             <div className="py-2.5 flex items-center justify-between">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <Building2 className="w-3.5 h-3.5 text-indigo-400" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <Building2 className="w-3.5 h-3.5 text-indigo-600" />
                                     القسم الأصلي:
                                 </span>
-                                <span className="font-semibold text-slate-200">{document.department?.name}</span>
+                                <span className="font-semibold text-slate-900">{document.department?.name}</span>
                             </div>
 
                             <div className="py-2.5 flex items-center justify-between">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <Folder className="w-3.5 h-3.5 text-amber-400" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <Folder className="w-3.5 h-3.5 text-amber-600" />
                                     المجلد / التصنيف:
                                 </span>
-                                <span className="font-semibold text-slate-200">{document.category?.name}</span>
+                                <span className="font-semibold text-slate-900">{document.category?.name}</span>
                             </div>
 
                             <div className="py-2.5 flex items-center justify-between">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <Calendar className="w-3.5 h-3.5" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-indigo-600" />
                                     تاريخ المستند:
                                 </span>
-                                <span className="font-semibold text-slate-200">{document.doc_date}</span>
+                                <span className="font-semibold text-slate-900">{document.doc_date}</span>
                             </div>
 
                             <div className="py-2.5 flex items-center justify-between">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <UserIcon className="w-3.5 h-3.5" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <UserIcon className="w-3.5 h-3.5 text-indigo-600" />
                                     الرافع الأصلي:
                                 </span>
-                                <span className="font-semibold text-slate-200">
+                                <span className="font-semibold text-slate-900">
                                     {document.uploader?.name || 'النظام'}
                                 </span>
                             </div>
 
                             <div className="py-2.5 flex items-center justify-between">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <Layers className="w-3.5 h-3.5 text-purple-400" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <Layers className="w-3.5 h-3.5 text-purple-600" />
                                     حجم الملف:
                                 </span>
-                                <span className="font-mono text-slate-300">
+                                <span className="font-mono text-slate-700">
                                     {formatBytes(latestVersion?.file_size)}
                                 </span>
                             </div>
 
                             <div className="py-2.5 flex flex-col gap-1">
-                                <span className="text-slate-400 flex items-center gap-1.5">
-                                    <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                                <span className="text-slate-500 flex items-center gap-1.5">
+                                    <Shield className="w-3.5 h-3.5 text-emerald-600" />
                                     البصمة الرقمية (SHA-256):
                                 </span>
-                                <span className="font-mono text-[10px] text-slate-300 bg-slate-950 p-2 rounded-lg border border-slate-800 break-all">
+                                <span className="font-mono text-[10px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200 break-all">
                                     {latestVersion?.file_hash || 'غير متوفر'}
                                 </span>
                             </div>
@@ -948,16 +945,16 @@ export default function DocumentShow({
                                     onChange={(e) => setCommentData('body', e.target.value)}
                                     rows={3}
                                     placeholder="اكتب تعليقاً أو توجيهاً على المعاملة..."
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-inner"
                                 />
                                 {commentErrors.body && (
-                                    <p className="text-[11px] text-rose-400">{commentErrors.body}</p>
+                                    <p className="text-[11px] text-rose-600">{commentErrors.body}</p>
                                 )}
                                 <div className="flex justify-end">
                                     <button
                                         type="submit"
                                         disabled={commentProcessing || !commentData.body.trim()}
-                                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors"
                                     >
                                         <MessageSquare className="w-3.5 h-3.5" />
                                         {commentProcessing ? 'جارٍ الإرسال...' : 'إضافة تعليق'}
@@ -969,24 +966,24 @@ export default function DocumentShow({
                                 {comments.map((c) => (
                                     <div
                                         key={c.id}
-                                        className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5"
+                                        className="p-3 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs space-y-1.5"
                                     >
                                         <div className="flex items-center justify-between text-[11px]">
-                                            <span className="font-semibold text-slate-200">
+                                            <span className="font-semibold text-slate-900">
                                                 {c.user?.name || 'مستخدم'}
                                             </span>
-                                            <span className="text-slate-500 font-mono">
+                                            <span className="text-slate-400 font-mono">
                                                 {c.created_at
                                                     ? new Date(c.created_at).toLocaleString('ar-EG')
                                                     : ''}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-slate-300 whitespace-pre-line">{c.body}</p>
+                                        <p className="text-xs text-slate-700 whitespace-pre-line">{c.body}</p>
                                     </div>
                                 ))}
 
                                 {comments.length === 0 && (
-                                    <div className="text-center py-8 text-xs text-slate-500">لا توجد تعليقات بعد</div>
+                                    <div className="text-center py-8 text-xs text-slate-400">لا توجد تعليقات بعد</div>
                                 )}
                             </div>
                         </div>
@@ -995,14 +992,14 @@ export default function DocumentShow({
                     {/* Recipients / Inter-Department Route */}
                     {activeTab === 'recipients' && (
                         <div className="p-4 space-y-3">
-                            <div className="text-xs text-slate-400 pb-2 border-b border-slate-800 flex items-center justify-between">
+                            <div className="text-xs text-slate-500 pb-2 border-b border-slate-200 flex items-center justify-between">
                                 <span>مسار تحويل المستند وحالة وصوله للأقسام</span>
-                                <span className="text-indigo-400 font-mono font-bold">
+                                <span className="text-indigo-600 font-mono font-bold">
                                     {recipients.length} مستلم
                                 </span>
                             </div>
 
-                            <div className="divide-y divide-slate-800/80 max-h-[550px] overflow-y-auto">
+                            <div className="divide-y divide-slate-100 max-h-[550px] overflow-y-auto">
                                 {recipients.map((r) => (
                                     <div
                                         key={r.id}
@@ -1010,15 +1007,15 @@ export default function DocumentShow({
                                     >
                                         <div className="space-y-0.5 min-w-0">
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
+                                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700">
                                                     #{r.priority}
                                                 </span>
-                                                <span className="font-semibold text-slate-200 truncate">
+                                                <span className="font-semibold text-slate-900 truncate">
                                                     {r.user?.name}
                                                 </span>
                                             </div>
                                             <div className="text-[10px] text-slate-500 flex items-center gap-1">
-                                                <Building2 className="w-3 h-3 text-indigo-400 shrink-0" />
+                                                <Building2 className="w-3 h-3 text-indigo-600 shrink-0" />
                                                 <span>{r.department?.name}</span>
                                                 {r.sender && (
                                                     <span className="text-slate-400">
@@ -1030,15 +1027,15 @@ export default function DocumentShow({
 
                                         {r.status === 'read' ? (
                                             <span
-                                                className="shrink-0 inline-flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800/40"
+                                                className="shrink-0 inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200"
                                                 title={r.read_at ? new Date(r.read_at).toLocaleString('ar-EG') : ''}
                                             >
-                                                <CheckCheck className="w-3 h-3" />
+                                                <CheckCheck className="w-3 h-3 text-emerald-600" />
                                                 تمت القراءة
                                             </span>
                                         ) : (
-                                            <span className="shrink-0 inline-flex items-center gap-1 text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
-                                                <Clock className="w-3 h-3" />
+                                            <span className="shrink-0 inline-flex items-center gap-1 text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                                <Clock className="w-3 h-3 text-slate-500" />
                                                 لم يُقرأ بعد
                                             </span>
                                         )}
@@ -1046,7 +1043,7 @@ export default function DocumentShow({
                                 ))}
 
                                 {recipients.length === 0 && (
-                                    <div className="text-center py-8 text-xs text-slate-500">
+                                    <div className="text-center py-8 text-xs text-slate-400">
                                         لم يتم تحويل المستند لأي قسم حتى الآن
                                     </div>
                                 )}
@@ -1067,19 +1064,18 @@ export default function DocumentShow({
                                     return (
                                         <div
                                             key={ver.id}
-                                            className={`p-3.5 rounded-xl border text-xs space-y-2 transition-all ${
-                                                isViewingThis
-                                                    ? 'bg-indigo-950/40 border-indigo-500/60'
-                                                    : 'bg-slate-950/50 border-slate-800'
-                                            }`}
+                                            className={`p-3.5 rounded-xl border text-xs space-y-2 transition-all ${isViewingThis
+                                                ? 'bg-indigo-50/70 border-indigo-300'
+                                                : 'bg-slate-50 border-slate-200'
+                                                }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-white text-sm">
+                                                    <span className="font-bold text-slate-900 text-sm">
                                                         v{ver.version_no}
                                                     </span>
                                                     {isCurrent && (
-                                                        <span className="text-[10px] px-1.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+                                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
                                                             الأحدث
                                                         </span>
                                                     )}
@@ -1089,14 +1085,14 @@ export default function DocumentShow({
                                                     <button
                                                         type="button"
                                                         onClick={() => setSelectedPreviewVersion(ver)}
-                                                        className="px-2 py-1 rounded bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                                        className="px-2.5 py-1 rounded-lg bg-white text-slate-700 hover:text-indigo-700 hover:bg-slate-100 border border-slate-200 transition-colors shadow-2xs"
                                                     >
                                                         معاينة
                                                     </button>
                                                     {can.download && (
                                                         <a
                                                             href={`/documents/${document.id}/versions/${ver.id}/download`}
-                                                            className="p-1 rounded bg-slate-800 text-slate-300 hover:text-cyan-300 hover:bg-slate-700 transition-colors"
+                                                            className="p-1.5 rounded-lg bg-white text-slate-700 hover:text-indigo-600 hover:bg-slate-100 border border-slate-200 transition-colors shadow-2xs"
                                                             title="تحميل"
                                                             download
                                                         >
@@ -1106,21 +1102,21 @@ export default function DocumentShow({
                                                 </div>
                                             </div>
 
-                                            <div className="text-slate-300">
+                                            <div className="text-slate-700">
                                                 {ver.original_name} •{' '}
-                                                <span className="font-mono text-slate-400">
+                                                <span className="font-mono text-slate-500">
                                                     {formatBytes(ver.file_size)}
                                                 </span>
                                             </div>
 
                                             {ver.change_notes && (
-                                                <div className="text-[11px] text-purple-300 bg-purple-950/30 p-2 rounded-lg border border-purple-900/50 flex items-start gap-1.5">
-                                                    <PenTool className="w-3 h-3 text-purple-400 shrink-0 mt-0.5" />
+                                                <div className="text-[11px] text-purple-800 bg-purple-50 p-2 rounded-lg border border-purple-200 flex items-start gap-1.5">
+                                                    <PenTool className="w-3 h-3 text-purple-600 shrink-0 mt-0.5" />
                                                     <span>{ver.change_notes}</span>
                                                 </div>
                                             )}
 
-                                            <div className="text-[10px] text-slate-500 flex items-center justify-between pt-1">
+                                            <div className="text-[10px] text-slate-400 flex items-center justify-between pt-1">
                                                 <span>بواسطة: {ver.uploader?.name || 'مستخدم'}</span>
                                                 <span className="font-mono">
                                                     {ver.created_at
@@ -1137,18 +1133,18 @@ export default function DocumentShow({
 
                     {/* Audit */}
                     {activeTab === 'audit' && isAdmin && (
-                        <div className="p-4 divide-y divide-slate-800/80 max-h-[550px] overflow-y-auto">
+                        <div className="p-4 divide-y divide-slate-100 max-h-[550px] overflow-y-auto">
                             {document.audit_logs?.map((log) => (
                                 <div key={log.id} className="py-2.5 first:pt-0 space-y-1 text-xs">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-semibold text-slate-200">
+                                        <span className="font-semibold text-slate-900">
                                             {log.user?.name || 'النظام'}
                                         </span>
-                                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700">
+                                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-medium">
                                             {log.action}
                                         </span>
                                     </div>
-                                    <div className="text-[10px] text-slate-500 font-mono">
+                                    <div className="text-[10px] text-slate-400 font-mono">
                                         {log.created_at
                                             ? new Date(log.created_at).toLocaleString('ar-EG')
                                             : ''}
@@ -1157,26 +1153,25 @@ export default function DocumentShow({
                             ))}
 
                             {(!document.audit_logs || document.audit_logs.length === 0) && (
-                                <div className="text-center py-8 text-xs text-slate-500">لا توجد حركات مسجلة</div>
+                                <div className="text-center py-8 text-xs text-slate-400">لا توجد حركات مسجلة</div>
                             )}
                         </div>
                     )}
                 </div>
             </div>
-
             {/* Inter-Department Forward Modal */}
             {forwardModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl">
-                        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-xl">
+                        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                             <div className="flex items-center gap-2">
-                                <Send className="w-5 h-5 text-indigo-400" />
-                                <h3 className="text-sm font-bold text-white">تحويل المعاملة إلى قسم آخر</h3>
+                                <Send className="w-5 h-5 text-indigo-600" />
+                                <h3 className="text-sm font-bold text-slate-900">تحويل المعاملة إلى قسم آخر</h3>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setForwardModalOpen(false)}
-                                className="text-slate-400 hover:text-white"
+                                className="text-slate-400 hover:text-slate-700 transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -1185,8 +1180,8 @@ export default function DocumentShow({
                         <form onSubmit={handleForwardSubmit} className="p-5 space-y-4">
                             {/* Department Selection */}
                             <div className="space-y-1.5">
-                                <label className="block text-xs font-semibold text-slate-300">
-                                    القسم المراد التحويل إليه <span className="text-rose-400">*</span>
+                                <label className="block text-xs font-semibold text-slate-700">
+                                    القسم المراد التحويل إليه <span className="text-rose-600">*</span>
                                 </label>
                                 <select
                                     value={selectedForwardDeptId}
@@ -1194,11 +1189,11 @@ export default function DocumentShow({
                                         setSelectedForwardDeptId(e.target.value);
                                         setSelectedForwardUserIds([]);
                                     }}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-inner"
                                 >
                                     {recipientDepartments.map((dept) => (
                                         <option key={dept.id} value={dept.id}>
-                                            {dept.name} ({dept.users.length} موظف)
+                                            {dept.name} ({dept.users.length} عضو)
                                         </option>
                                     ))}
                                 </select>
@@ -1208,39 +1203,38 @@ export default function DocumentShow({
                             {currentForwardDept && (
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between text-xs">
-                                        <label className="font-semibold text-slate-300">
-                                            الموظفون المستلمون بالقسم ({currentForwardDept.name})
+                                        <label className="font-semibold text-slate-700">
+                                            العضوون المستلمون بالقسم ({currentForwardDept.name})
                                         </label>
                                         <button
                                             type="button"
                                             onClick={handleSelectAllDeptUsers}
-                                            className="text-indigo-400 hover:text-indigo-300 text-[11px] font-semibold"
+                                            className="text-indigo-600 hover:text-indigo-700 text-[11px] font-semibold transition-colors"
                                         >
                                             {selectedForwardUserIds.length === currentForwardDept.users.length
                                                 ? 'إلغاء تحديد الكل'
-                                                : 'تحديد جميع الموظفين'}
+                                                : 'تحديد جميع العضوين'}
                                         </button>
                                     </div>
 
-                                    <div className="space-y-1.5 max-h-52 overflow-y-auto border border-slate-800 rounded-xl p-2 bg-slate-950/60">
+                                    <div className="space-y-1.5 max-h-52 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 shadow-inner">
                                         {currentForwardDept.users.map((u) => {
                                             const checked = selectedForwardUserIds.includes(u.id);
                                             return (
                                                 <label
                                                     key={u.id}
-                                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-xs transition-colors ${
-                                                        checked
-                                                            ? 'bg-indigo-950/50 border-indigo-600 text-white'
-                                                            : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
-                                                    }`}
+                                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-xs transition-colors ${checked
+                                                        ? 'bg-indigo-50 border-indigo-300 text-indigo-900 font-semibold shadow-2xs'
+                                                        : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                                                        }`}
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={checked}
                                                         onChange={() => handleToggleForwardUser(u.id)}
-                                                        className="accent-indigo-500"
+                                                        className="accent-indigo-600"
                                                     />
-                                                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">
+                                                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600">
                                                         #{u.order_num ?? '-'}
                                                     </span>
                                                     <span className="truncate">{u.name}</span>
@@ -1249,20 +1243,20 @@ export default function DocumentShow({
                                         })}
 
                                         {currentForwardDept.users.length === 0 && (
-                                            <div className="text-center py-4 text-xs text-slate-500">
-                                                لا يوجد موظفون نشطون في هذا القسم حالياً
+                                            <div className="text-center py-4 text-xs text-slate-400">
+                                                لا يوجد عضوون نشطون في هذا القسم حالياً
                                             </div>
                                         )}
                                     </div>
                                     <p className="text-[11px] text-slate-400">
-                                        * إذا لم تحدد موظفين بعينهم، سيتم تحويل المعاملة لكافة موظفي القسم.
+                                        * إذا لم تحدد عضوين بعينهم، سيتم تحويل المعاملة لكافة عضوي القسم.
                                     </p>
                                 </div>
                             )}
 
                             {/* Note / Directive */}
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     ملاحظات أو توجيه التحويل (اختياري)
                                 </label>
                                 <textarea
@@ -1270,22 +1264,22 @@ export default function DocumentShow({
                                     onChange={(e) => setForwardNote(e.target.value)}
                                     rows={3}
                                     placeholder="اكتب التوجيه أو سبب التحويل ليظهر في سجل المعاملة..."
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-inner"
                                 />
                             </div>
 
-                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                                 <button
                                     type="button"
                                     onClick={() => setForwardModalOpen(false)}
-                                    className="px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-slate-800"
+                                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                                 >
                                     إلغاء
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={forwardSubmitting || !selectedForwardDeptId}
-                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow disabled:opacity-50"
+                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 disabled:opacity-50 transition-all"
                                 >
                                     {forwardSubmitting ? 'جارٍ التحويل...' : 'تحويل المعاملة الآن'}
                                 </button>
@@ -1294,16 +1288,14 @@ export default function DocumentShow({
                     </div>
                 </div>
             )}
-
             {/* Document Signature Modal */}
             {signModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
                     <div
-                        className={`w-full ${
-                            signStep === 'place' ? 'max-w-3xl' : 'max-w-lg'
-                        } max-h-[95vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl`}
+                        className={`w-full ${signStep === 'place' ? 'max-w-3xl' : 'max-w-lg'
+                            } max-h-[95vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl`}
                     >
-                        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <PenTool className="w-5 h-5 text-purple-400" />
                                 <h3 className="text-sm font-bold text-white">
@@ -1315,7 +1307,7 @@ export default function DocumentShow({
                             <button
                                 type="button"
                                 onClick={() => !signProcessing && setSignModalOpen(false)}
-                                className="text-slate-400 hover:text-white"
+                                className="text-slate-500 hover:text-indigo-900"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -1326,26 +1318,25 @@ export default function DocumentShow({
                                 <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto" />
                                 <div className="space-y-1">
                                     <h4 className="text-sm font-bold text-white">{signProcessingMsg}</h4>
-                                    <p className="text-xs text-slate-400">يرجى الانتظار قليلاً...</p>
+                                    <p className="text-xs text-slate-500">يرجى الانتظار قليلاً...</p>
                                 </div>
                             </div>
                         ) : signStep === 'source' ? (
                             /* ---------- Step 1: choose the signature ---------- */
                             <div className="p-5 space-y-4">
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         مصدر التوقيع
                                     </label>
-                                    <div className="flex rounded-xl bg-slate-950 border border-slate-800 p-1 gap-1 text-xs font-semibold">
+                                    <div className="flex rounded-xl bg-slate-150 border border-slate-200 p-1 gap-1 text-xs font-semibold">
                                         {hasSignature && (
                                             <button
                                                 type="button"
                                                 onClick={() => setSignSource('profile')}
-                                                className={`flex-1 py-2 rounded-lg transition-colors ${
-                                                    signSource === 'profile'
-                                                        ? 'bg-purple-600 text-white shadow'
-                                                        : 'text-slate-400 hover:text-slate-200'
-                                                }`}
+                                                className={`flex-1 py-2 rounded-lg transition-colors ${signSource === 'profile'
+                                                    ? 'bg-purple-600 text-white shadow'
+                                                    : 'text-slate-500 hover:text-slate-200'
+                                                    }`}
                                             >
                                                 توقيعي المحفوظ
                                             </button>
@@ -1353,22 +1344,20 @@ export default function DocumentShow({
                                         <button
                                             type="button"
                                             onClick={() => setSignSource('draw')}
-                                            className={`flex-1 py-2 rounded-lg transition-colors ${
-                                                signSource === 'draw'
-                                                    ? 'bg-purple-600 text-white shadow'
-                                                    : 'text-slate-400 hover:text-slate-200'
-                                            }`}
+                                            className={`flex-1 py-2 rounded-lg transition-colors ${signSource === 'draw'
+                                                ? 'bg-purple-600 text-white shadow'
+                                                : 'text-slate-500 hover:text-slate-200'
+                                                }`}
                                         >
                                             رسم توقيع جديد
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setSignSource('upload')}
-                                            className={`flex-1 py-2 rounded-lg transition-colors ${
-                                                signSource === 'upload'
-                                                    ? 'bg-purple-600 text-white shadow'
-                                                    : 'text-slate-400 hover:text-slate-200'
-                                            }`}
+                                            className={`flex-1 py-2 rounded-lg transition-colors ${signSource === 'upload'
+                                                ? 'bg-purple-600 text-white shadow'
+                                                : 'text-slate-500 hover:text-slate-200'
+                                                }`}
                                         >
                                             رفع صورة توقيع
                                         </button>
@@ -1387,7 +1376,7 @@ export default function DocumentShow({
 
                                 {signSource === 'draw' && (
                                     <div className="space-y-1.5">
-                                        <div className="flex items-center justify-between text-xs text-slate-400">
+                                        <div className="flex items-center justify-between text-xs text-slate-500">
                                             <span>ارسم توقيعك بالقلم أدناه:</span>
                                             <button
                                                 type="button"
@@ -1398,7 +1387,7 @@ export default function DocumentShow({
                                                 <span>مسح</span>
                                             </button>
                                         </div>
-                                        <div className="rounded-xl border border-slate-700 bg-white p-1">
+                                        <div className="rounded-xl border border-slate-300 bg-white p-1">
                                             <SignatureCanvas
                                                 ref={signCanvasRef}
                                                 penColor="#0f172a"
@@ -1418,16 +1407,16 @@ export default function DocumentShow({
                                             type="file"
                                             accept="image/png,image/jpeg,image/webp"
                                             onChange={(e) => setUploadedSignFile(e.target.files?.[0] || null)}
-                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                                            className="w-full bg-slate-150 border border-slate-300 rounded-xl px-3 py-2 text-xs text-white"
                                         />
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                                     <button
                                         type="button"
                                         onClick={() => setSignModalOpen(false)}
-                                        className="px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-slate-800"
+                                        className="px-3.5 py-2 rounded-xl text-xs text-slate-500 hover:text-indigo-900 hover:bg-slate-100"
                                     >
                                         إلغاء
                                     </button>
@@ -1444,19 +1433,19 @@ export default function DocumentShow({
                         ) : (
                             /* ---------- Step 2: free placement on the document ---------- */
                             <form onSubmit={handleApplySignature} className="p-5 space-y-4">
-                                <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                                <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
                                     <Move className="w-3.5 h-3.5 text-purple-400" />
                                     اسحب التوقيع بالماوس أو بإصبعك إلى أي مكان تريده على المستند.
                                 </p>
 
                                 {/* PDF page navigation */}
                                 {isPdf && numPages > 1 && (
-                                    <div className="flex items-center justify-center gap-3 text-xs text-slate-300">
+                                    <div className="flex items-center justify-center gap-3 text-xs text-slate-700">
                                         <button
                                             type="button"
                                             onClick={() => setPageNum((p) => Math.max(1, p - 1))}
                                             disabled={pageNum <= 1}
-                                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40"
+                                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40"
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </button>
@@ -1467,7 +1456,7 @@ export default function DocumentShow({
                                             type="button"
                                             onClick={() => setPageNum((p) => Math.min(numPages, p + 1))}
                                             disabled={pageNum >= numPages}
-                                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40"
+                                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 disabled:opacity-40"
                                         >
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
@@ -1475,7 +1464,7 @@ export default function DocumentShow({
                                 )}
 
                                 {/* Document + draggable signature */}
-                                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 max-h-[60vh] overflow-auto">
+                                <div className="rounded-xl border border-slate-200 bg-slate-150 p-3 max-h-[60vh] overflow-auto">
                                     <div ref={wrapperRef} className="relative mx-auto w-fit max-w-full" dir="ltr">
                                         {isPdf ? (
                                             <canvas
@@ -1493,7 +1482,7 @@ export default function DocumentShow({
                                         )}
 
                                         {isPdf && pageLoading && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-slate-150/60">
                                                 <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
                                             </div>
                                         )}
@@ -1505,8 +1494,8 @@ export default function DocumentShow({
                                 {/* Size slider */}
                                 <div className="space-y-1.5">
                                     <div className="flex items-center justify-between text-xs">
-                                        <label className="font-semibold text-slate-300">حجم التوقيع</label>
-                                        <span className="font-mono text-slate-400">{Math.round(sigW * 100)}%</span>
+                                        <label className="font-semibold text-slate-700">حجم التوقيع</label>
+                                        <span className="font-mono text-slate-500">{Math.round(sigW * 100)}%</span>
                                     </div>
                                     <input
                                         type="range"
@@ -1520,7 +1509,7 @@ export default function DocumentShow({
                                 </div>
 
                                 {/* Finish Document Checkbox */}
-                                <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+                                <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-150 border border-slate-200 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         checked={signMarkFinish}
@@ -1531,7 +1520,7 @@ export default function DocumentShow({
                                         <span className="font-semibold text-white block">
                                             إنهاء المعاملة وتحديدها كمكتملة (Finish)
                                         </span>
-                                        <span className="text-[11px] text-slate-400">
+                                        <span className="text-[11px] text-slate-500">
                                             تعليم حالة المستند كمكتمل بعد التوقيع والاعتماد.
                                         </span>
                                     </div>
@@ -1539,7 +1528,7 @@ export default function DocumentShow({
 
                                 {/* Optional Signer Note */}
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         ملاحظات الاعتماد (اختياري)
                                     </label>
                                     <input
@@ -1547,15 +1536,15 @@ export default function DocumentShow({
                                         value={signNote}
                                         onChange={(e) => setSignNote(e.target.value)}
                                         placeholder="مثال: تم المراجعة والاعتماد بعد استيفاء الشروط..."
-                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
+                                        className="w-full bg-slate-150 border border-slate-300 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500"
                                     />
                                 </div>
 
-                                <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
+                                <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-200">
                                     <button
                                         type="button"
                                         onClick={() => setSignStep('source')}
-                                        className="px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-slate-800"
+                                        className="px-3.5 py-2 rounded-xl text-xs text-slate-500 hover:text-indigo-900 hover:bg-slate-100"
                                     >
                                         رجوع
                                     </button>
@@ -1563,7 +1552,7 @@ export default function DocumentShow({
                                         <button
                                             type="button"
                                             onClick={() => setSignModalOpen(false)}
-                                            className="px-3.5 py-2 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-slate-800"
+                                            className="px-3.5 py-2 rounded-xl text-xs text-slate-500 hover:text-indigo-900 hover:bg-slate-100"
                                         >
                                             إلغاء
                                         </button>

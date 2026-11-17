@@ -45,7 +45,7 @@ interface Props {
 }
 
 const inputCls =
-    'w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500';
+    'w-full bg-slate-150 border border-slate-300 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500';
 
 export default function UsersIndex({ users, filters, departments, roles, orderStats }: Props) {
     const [search, setSearch] = useState(filters.search || '');
@@ -289,14 +289,14 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
     return (
         <AppLayout title="إدارة المستخدمين">
-            <Head title="إدارة المستخدمين والموظفين - سيستم الأرشيف" />
+            <Head title="إدارة المستخدمين والعضوين - سيستم الأرشيف" />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
                 <div className="space-y-1">
                     <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
                         <Users className="w-5 h-5 text-indigo-400" />
-                        <span>إدارة المستخدمين والموظفين</span>
+                        <span>إدارة المستخدمين والعضوين</span>
                     </h2>
                 </div>
 
@@ -311,16 +311,16 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
             </div>
 
             {/* Search and Filters */}
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-xl space-y-3">
+            <div className="p-4 rounded-2xl bg-white/60 border border-slate-200 shadow-xl space-y-3">
                 <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                     <div className="sm:col-span-5 relative">
-                        <Search className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Search className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="ابحث بالاسم أو البريد الإلكتروني..."
-                            className="w-full bg-slate-950 border border-slate-700/80 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-slate-150 border border-slate-300/80 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                         />
                     </div>
 
@@ -328,7 +328,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                         <select
                             value={departmentId}
                             onChange={(e) => setDepartmentId(e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-slate-150 border border-slate-300/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                         >
                             <option value="">كافة الأقسام</option>
                             {departments.map((d) => (
@@ -343,7 +343,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-slate-150 border border-slate-300/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
                         >
                             <option value="">كافة الحالات</option>
                             <option value="active">نشط</option>
@@ -354,7 +354,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                     <div className="sm:col-span-2 flex gap-2">
                         <button
                             type="submit"
-                            className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700"
+                            className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-300 shadow-2xs transition-colors"
                         >
                             بحث
                         </button>
@@ -362,7 +362,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             <button
                                 type="button"
                                 onClick={clearFilters}
-                                className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700"
+                                className="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-500 border border-slate-300"
                                 title="مسح الفلاتر"
                             >
                                 <X className="w-4 h-4" />
@@ -373,10 +373,10 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
             </div>
 
             {/* Users Table */}
-            <div className="overflow-x-auto rounded-2xl border border-slate-800/80 bg-slate-900/60 shadow-xl">
+            <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <table className="w-full text-right text-xs">
                     <thead>
-                        <tr className="border-b border-slate-800 text-slate-400 font-semibold bg-slate-900/80">
+                        <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50">
                             <th className="py-3.5 px-4">المستخدم</th>
                             <th className="py-3.5 px-3">القسم التابع له</th>
                             <th className="py-3.5 px-3">الترتيب</th>
@@ -386,24 +386,24 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             <th className="py-3.5 px-3 text-left">الإجراءات</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-slate-100">
                         {users.data.map((u) => {
                             const roleName = u.roles?.[0]?.display_name || u.roles?.[0]?.name || 'مشاهد';
                             const isSuper = u.roles?.[0]?.name === 'admin';
 
                             return (
-                                <tr key={u.id} className="hover:bg-slate-800/40 transition-colors">
+                                <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
                                     <td className="py-3.5 px-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-2xs">
                                                 {u.name.charAt(0)}
                                             </div>
                                             <div className="space-y-0.5">
-                                                <div className="font-bold text-slate-100 flex items-center gap-1.5">
+                                                <div className="font-bold text-slate-900 flex items-center gap-1.5">
                                                     <span>{u.name}</span>
                                                     {isSuper && (
                                                         <span title="مدير عام">
-                                                            <Shield className="w-3 h-3 text-amber-400 inline" />
+                                                            <Shield className="w-3 h-3 text-amber-600 inline" />
                                                         </span>
                                                     )}
                                                 </div>
@@ -413,27 +413,26 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                     </td>
 
                                     <td className="py-3.5 px-3">
-                                        <span className="text-[11px] font-medium text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60 inline-flex items-center gap-1">
-                                            <Building2 className="w-3 h-3 text-indigo-400" />
-                                            <span>{(u.department as any)?.name ?? 'الإدارة '}</span>
+                                        <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 inline-flex items-center gap-1 shadow-2xs">
+                                            <Building2 className="w-3 h-3 text-indigo-600" />
+                                            <span>{(u.department as any)?.name ?? 'الإدارة'}</span>
                                         </span>
                                     </td>
 
                                     <td className="py-3.5 px-3">
-                                        <span className="text-[11px] font-mono text-slate-300 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
+                                        <span className="text-[11px] font-mono font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
                                             #{u.order_num ?? '-'}
                                         </span>
                                     </td>
 
                                     <td className="py-3.5 px-3">
                                         <span
-                                            className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${
-                                                isSuper
-                                                    ? 'bg-amber-950/60 text-amber-400 border-amber-800/50'
-                                                    : roleName.includes('مؤرشف')
-                                                      ? 'bg-purple-950/60 text-purple-400 border-purple-800/50'
-                                                      : 'bg-slate-800 text-slate-300 border-slate-700'
-                                            }`}
+                                            className={`text-[10px] px-2.5 py-1 rounded-full border font-semibold shadow-2xs ${isSuper
+                                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                                : roleName.includes('مؤرشف')
+                                                    ? 'bg-purple-50 text-purple-800 border-purple-200'
+                                                    : 'bg-slate-100 text-slate-700 border-slate-200'
+                                                }`}
                                         >
                                             {roleName}
                                         </span>
@@ -441,18 +440,18 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
                                     <td className="py-3.5 px-3">
                                         {u.status === 'active' ? (
-                                            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-semibold bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-800/40">
-                                                <CheckCircle2 className="w-3 h-3" />
+                                            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 shadow-2xs">
+                                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                                 نشط
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 font-medium bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700">
+                                            <span className="inline-flex items-center gap-1 text-[10px] text-slate-600 font-medium bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
                                                 معطل
                                             </span>
                                         )}
                                     </td>
 
-                                    <td className="py-3.5 px-3 text-slate-400 text-[11px] font-mono">
+                                    <td className="py-3.5 px-3 text-slate-500 text-[11px] font-mono">
                                         {u.created_at ? new Date(u.created_at).toLocaleDateString('ar-EG') : '-'}
                                     </td>
 
@@ -461,7 +460,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                             <button
                                                 type="button"
                                                 onClick={() => openEditModal(u)}
-                                                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                                                className="p-1.5 rounded-lg bg-white text-slate-700 hover:text-indigo-600 hover:bg-slate-100 border border-slate-200 transition-colors shadow-2xs"
                                                 title="تعديل المستخدم"
                                             >
                                                 <Edit2 className="w-3.5 h-3.5" />
@@ -470,7 +469,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                             <button
                                                 type="button"
                                                 onClick={() => handleDeleteUser(u)}
-                                                className="p-1.5 rounded-lg bg-slate-800/80 text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 transition-colors"
+                                                className="p-1.5 rounded-lg bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-colors shadow-2xs"
                                                 title="حذف المستخدم"
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -483,7 +482,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
                         {users.data.length === 0 && (
                             <tr>
-                                <td colSpan={7} className="text-center py-12 text-slate-500 text-xs">
+                                <td colSpan={7} className="text-center py-12 text-slate-400 text-xs">
                                     لا يوجد مستخدمون مطابقون لمعايير البحث
                                 </td>
                             </tr>
@@ -498,13 +497,13 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
             {/* Create User Modal */}
             {createModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl">
-                        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl">
+                        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <UserPlus className="w-5 h-5 text-indigo-400" />
                                 <h3 className="text-sm font-bold text-white">إضافة مستخدم</h3>
                             </div>
-                            <button type="button" onClick={closeCreateModal} className="text-slate-400 hover:text-white">
+                            <button type="button" onClick={closeCreateModal} className="text-slate-500 hover:text-indigo-900">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -512,7 +511,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                         <form onSubmit={handleCreateSubmit} className="p-5 space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         الاسم الكامل <span className="text-rose-400">*</span>
                                     </label>
                                     <input
@@ -527,7 +526,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         البريد الإلكتروني <span className="text-rose-400">*</span>
                                     </label>
                                     <input
@@ -544,17 +543,16 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
                             {/* Signature */}
                             <div className="space-y-3">
-                                <label className="block text-xs font-semibold text-slate-300">التوقيع الإلكتروني</label>
+                                <label className="block text-xs font-semibold text-slate-700">التوقيع الإلكتروني</label>
 
                                 <div className="flex gap-2">
                                     <button
                                         type="button"
                                         onClick={() => setSignatureMode('draw')}
-                                        className={`flex-1 rounded-lg px-4 py-2 text-xs ${
-                                            signatureMode === 'draw'
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-slate-800 text-slate-300'
-                                        }`}
+                                        className={`flex-1 rounded-lg px-4 py-2 text-xs ${signatureMode === 'draw'
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-slate-100 text-slate-700'
+                                            }`}
                                     >
                                         رسم التوقيع
                                     </button>
@@ -562,11 +560,10 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                     <button
                                         type="button"
                                         onClick={() => setSignatureMode('upload')}
-                                        className={`flex-1 rounded-lg px-4 py-2 text-xs ${
-                                            signatureMode === 'upload'
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-slate-800 text-slate-300'
-                                        }`}
+                                        className={`flex-1 rounded-lg px-4 py-2 text-xs ${signatureMode === 'upload'
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-slate-100 text-slate-700'
+                                            }`}
                                     >
                                         رفع صورة
                                     </button>
@@ -574,7 +571,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
                                 {signatureMode === 'draw' ? (
                                     <div className="space-y-2">
-                                        <div className="rounded-xl border border-slate-700 bg-white overflow-hidden">
+                                        <div className="rounded-xl border border-slate-300 bg-white overflow-hidden">
                                             <SignatureCanvas
                                                 ref={signatureRef}
                                                 penColor="black"
@@ -588,7 +585,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                         <button
                                             type="button"
                                             onClick={clearDrawnSignature}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs border border-slate-700"
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-200 text-xs border border-slate-300"
                                         >
                                             <Eraser className="w-3.5 h-3.5" />
                                             <span>مسح وإعادة الكتابة</span>
@@ -607,11 +604,11 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                                 setSignatureFile(file);
                                                 setSignatureImage(URL.createObjectURL(file));
                                             }}
-                                            className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-white"
+                                            className="block w-full text-xs text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-white"
                                         />
 
                                         {signatureImage && (
-                                            <div className="relative rounded-xl border border-slate-700 bg-white p-4">
+                                            <div className="relative rounded-xl border border-slate-300 bg-white p-4">
                                                 <img
                                                     src={signatureImage}
                                                     alt="Signature preview"
@@ -635,7 +632,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     كلمة المرور <span className="text-rose-400">*</span>
                                 </label>
                                 <input
@@ -653,7 +650,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">القسم التابع له</label>
+                                    <label className="block text-xs font-semibold text-slate-700">القسم التابع له</label>
                                     <select
                                         value={createData.department_id}
                                         onChange={(e) => handleCreateDepartmentChange(e.target.value)}
@@ -672,7 +669,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         الدور والصلاحيات <span className="text-rose-400">*</span>
                                     </label>
                                     <select
@@ -694,7 +691,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     ترتيب الأولوية في القسم <span className="text-rose-400">*</span>
                                 </label>
                                 <input
@@ -715,7 +712,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">حالة الحساب</label>
+                                <label className="block text-xs font-semibold text-slate-700">حالة الحساب</label>
                                 <select
                                     value={createData.status}
                                     onChange={(e) => setCreateData('status', e.target.value)}
@@ -726,11 +723,11 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                 </select>
                             </div>
 
-                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                                 <button
                                     type="button"
                                     onClick={closeCreateModal}
-                                    className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                                    className="px-4 py-2 rounded-xl text-xs text-slate-500 hover:text-indigo-900"
                                 >
                                     إلغاء
                                 </button>
@@ -750,13 +747,13 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
             {/* Edit User Modal */}
             {editModalOpen && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl">
-                        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                    <div className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white border border-slate-200 rounded-2xl shadow-2xl">
+                        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Edit2 className="w-5 h-5 text-indigo-400" />
                                 <h3 className="text-sm font-bold text-white">تعديل بيانات المستخدم</h3>
                             </div>
-                            <button type="button" onClick={closeEditModal} className="text-slate-400 hover:text-white">
+                            <button type="button" onClick={closeEditModal} className="text-slate-500 hover:text-indigo-900">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -764,7 +761,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                         <form onSubmit={handleEditSubmit} className="p-5 space-y-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         الاسم الكامل <span className="text-rose-400">*</span>
                                     </label>
                                     <input
@@ -778,7 +775,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         البريد الإلكتروني <span className="text-rose-400">*</span>
                                     </label>
                                     <input
@@ -793,7 +790,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300 flex items-center justify-between">
+                                <label className="block text-xs font-semibold text-slate-700 flex items-center justify-between">
                                     <span>كلمة المرور الجديدة</span>
                                     <span className="text-[10px] text-slate-500">اتركها فارغة إذا لم ترغب في التغيير</span>
                                 </label>
@@ -809,7 +806,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">القسم التابع له</label>
+                                    <label className="block text-xs font-semibold text-slate-700">القسم التابع له</label>
                                     <select
                                         value={editData.department_id}
                                         onChange={(e) => handleEditDepartmentChange(e.target.value)}
@@ -828,7 +825,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="block text-xs font-semibold text-slate-300">
+                                    <label className="block text-xs font-semibold text-slate-700">
                                         الدور والصلاحيات <span className="text-rose-400">*</span>
                                     </label>
                                     <select
@@ -848,7 +845,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     ترتيب الأولوية في القسم <span className="text-rose-400">*</span>
                                 </label>
                                 <input
@@ -869,7 +866,7 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">حالة الحساب</label>
+                                <label className="block text-xs font-semibold text-slate-700">حالة الحساب</label>
                                 <select
                                     value={editData.status}
                                     onChange={(e) => setEditData('status', e.target.value)}
@@ -880,11 +877,11 @@ export default function UsersIndex({ users, filters, departments, roles, orderSt
                                 </select>
                             </div>
 
-                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                                 <button
                                     type="button"
                                     onClick={closeEditModal}
-                                    className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                                    className="px-4 py-2 rounded-xl text-xs text-slate-500 hover:text-indigo-900"
                                 >
                                     إلغاء
                                 </button>

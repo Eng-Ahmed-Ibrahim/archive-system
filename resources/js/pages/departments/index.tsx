@@ -100,20 +100,19 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
             <Head title="الاقسام والمجلدات الرئيسية - سيستم الأرشيف" />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-200">
                 <div className="space-y-1">
-                    <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-                        <Building2 className="w-5 h-5 text-indigo-400" />
-                        <span>الاقسام </span>
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-indigo-600" />
+                        <span>الأقسام</span>
                     </h2>
-
                 </div>
 
                 {canManage && (
                     <button
                         type="button"
                         onClick={() => setCreateModalOpen(true)}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 transition-colors"
                     >
                         <Plus className="w-4 h-4" />
                         <span>إضافة قسم جديد</span>
@@ -121,33 +120,33 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                 )}
             </div>
 
-            {/* Department Cards Grid (Windows Drive/Folder Style) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {/* Department Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
                 {departments.map((dept) => (
                     <div
                         key={dept.id}
-                        className="group rounded-2xl border border-slate-800/80 bg-slate-900/60 hover:border-indigo-500/50 p-6 shadow-xl flex flex-col justify-between space-y-5 transition-all"
+                        className="group rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 p-6 shadow-sm flex flex-col justify-between space-y-5 transition-all"
                     >
                         <div className="space-y-4">
                             {/* Card Top */}
                             <div className="flex items-start justify-between">
                                 <Link
                                     href={`/categories?department_id=${dept.id}`}
-                                    className="flex items-start gap-3 flex-1 group-hover:text-indigo-300"
+                                    className="flex items-start gap-3 flex-1 group-hover:text-indigo-600"
                                 >
-                                    <div className="p-3 rounded-2xl bg-gradient-to-tr from-indigo-950 to-slate-900 border border-indigo-700/50 text-indigo-400 group-hover:scale-105 transition-transform shadow-md">
+                                    <div className="p-3 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 group-hover:scale-105 transition-transform shadow-2xs">
                                         <Building2 className="w-7 h-7" />
                                     </div>
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                                            <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                                                 {dept.name}
                                             </h3>
-                                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-bold">
+                                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-bold">
                                                 {dept.code || 'DEPT'}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-slate-400 line-clamp-2">
+                                        <p className="text-xs text-slate-500 line-clamp-2">
                                             {dept.description || 'لا يوجد وصف مضاف لهذا القسم.'}
                                         </p>
                                     </div>
@@ -158,7 +157,7 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                                         <button
                                             type="button"
                                             onClick={() => openEditModal(dept)}
-                                            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                                            className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
                                             title="تعديل بيانات القسم"
                                         >
                                             <Edit2 className="w-3.5 h-3.5" />
@@ -166,7 +165,7 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                                         <button
                                             type="button"
                                             onClick={() => handleDelete(dept)}
-                                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/50 transition-colors"
+                                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                                             title="حذف القسم"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
@@ -176,28 +175,28 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                             </div>
 
                             {/* Metrics Strip */}
-                            <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-800/80 text-center bg-slate-950/40 rounded-xl">
+                            <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 text-center bg-slate-50 rounded-xl">
                                 <div className="space-y-0.5">
-                                    <div className="text-lg font-black text-white">{dept.documents_count || 0}</div>
-                                    <div className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                                        <FileText className="w-2.5 h-2.5 text-cyan-400" />
+                                    <div className="text-lg font-black text-slate-900">{dept.documents_count || 0}</div>
+                                    <div className="text-[10px] text-slate-500 flex items-center justify-center gap-1">
+                                        <FileText className="w-2.5 h-2.5 text-indigo-600" />
                                         <span>مستند</span>
                                     </div>
                                 </div>
 
                                 <div className="space-y-0.5">
-                                    <div className="text-lg font-black text-white">{dept.categories_count || 0}</div>
-                                    <div className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                                        <Folder className="w-2.5 h-2.5 text-amber-400" />
+                                    <div className="text-lg font-black text-slate-900">{dept.categories_count || 0}</div>
+                                    <div className="text-[10px] text-slate-500 flex items-center justify-center gap-1">
+                                        <Folder className="w-2.5 h-2.5 text-amber-600" />
                                         <span>مجلد</span>
                                     </div>
                                 </div>
 
                                 <div className="space-y-0.5">
-                                    <div className="text-lg font-black text-white">{dept.users_count || 0}</div>
-                                    <div className="text-[10px] text-slate-400 flex items-center justify-center gap-1">
-                                        <Users className="w-2.5 h-2.5 text-purple-400" />
-                                        <span>موظف</span>
+                                    <div className="text-lg font-black text-slate-900">{dept.users_count || 0}</div>
+                                    <div className="text-[10px] text-slate-500 flex items-center justify-center gap-1">
+                                        <Users className="w-2.5 h-2.5 text-purple-600" />
+                                        <span>عضو</span>
                                     </div>
                                 </div>
                             </div>
@@ -208,20 +207,18 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                             {dept.can_access ? (
                                 <Link
                                     href={`/users?department_id=${dept.id}`}
-                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
+                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 transition-colors"
                                 >
-                                    <Users className="w-3.5 h-3.5 text-amber-300" />
-                                    <span>عرض موظفي القسم ({dept.users_count || 0})</span>
+                                    <Users className="w-3.5 h-3.5 text-indigo-600" />
+                                    <span>عرض أعضاء القسم ({dept.users_count || 0})</span>
                                     <ArrowLeft className="w-3.5 h-3.5" />
                                 </Link>
                             ) : (
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                <div className="flex items-center gap-1.5 text-xs text-slate-400">
                                     <Lock className="w-3.5 h-3.5" />
                                     <span>غير مصرح لك بعرض المستخدمين</span>
                                 </div>
                             )}
-
-
                         </div>
                     </div>
                 ))}
@@ -229,17 +226,17 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
 
             {/* Create Department Modal */}
             {createModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
-                        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+                    <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                             <div className="flex items-center gap-2">
-                                <Building2 className="w-5 h-5 text-indigo-400" />
-                                <h3 className="text-sm font-bold text-white">إضافة قسم إداري جديد</h3>
+                                <Building2 className="w-5 h-5 text-indigo-600" />
+                                <h3 className="text-sm font-bold text-slate-900">إضافة قسم إداري جديد</h3>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setCreateModalOpen(false)}
-                                className="text-slate-400 hover:text-white"
+                                className="text-slate-400 hover:text-slate-700 transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -247,24 +244,24 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
 
                         <form onSubmit={handleCreateSubmit} className="p-5 space-y-4">
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
-                                    اسم القسم <span className="text-rose-400">*</span>
+                                <label className="block text-xs font-semibold text-slate-700">
+                                    اسم القسم <span className="text-rose-600">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={createData.name}
                                     onChange={(e) => setCreateData('name', e.target.value)}
                                     placeholder="مثال: إدارة التسويق والعلاقات"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-inner"
                                     required
                                 />
                                 {createErrors.name && (
-                                    <p className="text-[11px] text-rose-400">{createErrors.name}</p>
+                                    <p className="text-[11px] text-rose-600">{createErrors.name}</p>
                                 )}
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     رمز / كود القسم (Code)
                                 </label>
                                 <input
@@ -272,15 +269,15 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                                     value={createData.code}
                                     onChange={(e) => setCreateData('code', e.target.value.toUpperCase())}
                                     placeholder="MKT"
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-indigo-700 font-mono uppercase font-semibold focus:outline-none focus:border-indigo-500 shadow-inner"
                                 />
                                 {createErrors.code && (
-                                    <p className="text-[11px] text-rose-400">{createErrors.code}</p>
+                                    <p className="text-[11px] text-rose-600">{createErrors.code}</p>
                                 )}
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     وصف القسم واختصاصه
                                 </label>
                                 <textarea
@@ -288,22 +285,22 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
                                     onChange={(e) => setCreateData('description', e.target.value)}
                                     rows={3}
                                     placeholder="وصف طبيعة عمل القسم والوثائق المعنية به..."
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-inner"
                                 />
                             </div>
 
-                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                                 <button
                                     type="button"
                                     onClick={() => setCreateModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                                 >
                                     إلغاء
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={createProcessing || !createData.name.trim()}
-                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow disabled:opacity-50"
+                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 disabled:opacity-50 transition-all"
                                 >
                                     {createProcessing ? 'جارٍ الإنشاء...' : 'إنشاء القسم'}
                                 </button>
@@ -315,17 +312,17 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
 
             {/* Edit Department Modal */}
             {editModalOpen && selectedDept && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs">
-                    <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
-                        <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+                    <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                             <div className="flex items-center gap-2">
-                                <Edit2 className="w-5 h-5 text-indigo-400" />
-                                <h3 className="text-sm font-bold text-white">تعديل بيانات القسم</h3>
+                                <Edit2 className="w-5 h-5 text-indigo-600" />
+                                <h3 className="text-sm font-bold text-slate-900">تعديل بيانات القسم</h3>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setEditModalOpen(false)}
-                                className="text-slate-400 hover:text-white"
+                                className="text-slate-400 hover:text-slate-700 transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -333,60 +330,60 @@ export default function DepartmentsIndex({ departments, canManage }: Props) {
 
                         <form onSubmit={handleEditSubmit} className="p-5 space-y-4">
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
-                                    اسم القسم <span className="text-rose-400">*</span>
+                                <label className="block text-xs font-semibold text-slate-700">
+                                    اسم القسم <span className="text-rose-600">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={editData.name}
                                     onChange={(e) => setEditData('name', e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-inner"
                                     required
                                 />
                                 {editErrors.name && (
-                                    <p className="text-[11px] text-rose-400">{editErrors.name}</p>
+                                    <p className="text-[11px] text-rose-600">{editErrors.name}</p>
                                 )}
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     رمز / كود القسم (Code)
                                 </label>
                                 <input
                                     type="text"
                                     value={editData.code}
                                     onChange={(e) => setEditData('code', e.target.value.toUpperCase())}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-indigo-700 font-mono uppercase font-semibold focus:outline-none focus:border-indigo-500 shadow-inner"
                                 />
                                 {editErrors.code && (
-                                    <p className="text-[11px] text-rose-400">{editErrors.code}</p>
+                                    <p className="text-[11px] text-rose-600">{editErrors.code}</p>
                                 )}
                             </div>
 
                             <div className="space-y-1">
-                                <label className="block text-xs font-semibold text-slate-300">
+                                <label className="block text-xs font-semibold text-slate-700">
                                     وصف القسم واختصاصه
                                 </label>
                                 <textarea
                                     value={editData.description}
                                     onChange={(e) => setEditData('description', e.target.value)}
                                     rows={3}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-inner"
                                 />
                             </div>
 
-                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                                 <button
                                     type="button"
                                     onClick={() => setEditModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+                                    className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
                                 >
                                     إلغاء
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={editProcessing || !editData.name.trim()}
-                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow disabled:opacity-50"
+                                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 disabled:opacity-50 transition-all"
                                 >
                                     {editProcessing ? 'جارٍ التحديث...' : 'حفظ التعديلات'}
                                 </button>

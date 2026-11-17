@@ -104,7 +104,7 @@ class DepartmentController extends Controller
         }
 
         if ($department->users()->exists()) {
-            return back()->with('error', "لا يمكن حذف قسم \"{$department->name}\" لوجود موظفين مسجلين عليه.");
+            return back()->with('error', "لا يمكن حذف قسم \"{$department->name}\" لوجود عضوين مسجلين عليه.");
         }
 
         $name = $department->name;

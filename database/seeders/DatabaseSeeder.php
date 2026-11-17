@@ -25,8 +25,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-
-        // 2. Roles & Permissions
         $permissions = [
             ['name' => 'documents.view', 'display_name' => 'عرض المستندات', 'group' => 'documents'],
             ['name' => 'documents.upload', 'display_name' => 'رفع مستندات جديدة', 'group' => 'documents'],
@@ -75,11 +73,10 @@ class DatabaseSeeder extends Seeder
             $permModels['documents.view']->id,
             $permModels['documents.download']->id,
         ]);
-        // 5. Users
         $admin = User::create([
-            'name' => 'أحمد إبراهيم (مدير النظام)',
-            'email' => 'admin@archive.local',
-            'password' => Hash::make('password'),
+            'name' => 'admin',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('12345678'),
             'department_id' => null,
             'status' => 'active',
         ]);

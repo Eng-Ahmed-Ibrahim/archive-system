@@ -22,9 +22,9 @@ export default function FilePreviewModal({ document, version, isOpen, onClose }:
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative w-full max-w-5xl h-[90vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="relative w-full max-w-5xl h-[90vh] bg-white border border-slate-300/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+                <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-white/90">
                     <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                             <h3 className="text-sm sm:text-base font-bold text-white truncate max-w-md">
@@ -34,7 +34,7 @@ export default function FilePreviewModal({ document, version, isOpen, onClose }:
                                 v{targetVersion?.version_no || 1}
                             </span>
                         </div>
-                        <div className="text-xs text-slate-400 font-mono">
+                        <div className="text-xs text-slate-500 font-mono">
                             {targetVersion?.original_name} • {document.reference_no}
                         </div>
                     </div>
@@ -44,7 +44,7 @@ export default function FilePreviewModal({ document, version, isOpen, onClose }:
                             href={previewUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                            className="p-2 rounded-lg bg-slate-100 text-slate-700 hover:text-indigo-900 hover:bg-slate-200 transition-colors"
                             title="فتح في علامة تبويب جديدة"
                         >
                             <ExternalLink className="w-4 h-4" />
@@ -62,7 +62,7 @@ export default function FilePreviewModal({ document, version, isOpen, onClose }:
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            className="p-2 rounded-lg text-slate-500 hover:text-indigo-900 hover:bg-slate-100 transition-colors"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -70,11 +70,11 @@ export default function FilePreviewModal({ document, version, isOpen, onClose }:
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 bg-slate-950 p-2 sm:p-4 flex items-center justify-center overflow-auto">
+                <div className="flex-1 bg-slate-150 p-2 sm:p-4 flex items-center justify-center overflow-auto">
                     {isPdf ? (
                         <iframe
                             src={previewUrl}
-                            className="w-full h-full rounded-xl border border-slate-800 bg-white"
+                            className="w-full h-full rounded-xl border border-slate-200 bg-white"
                             title={document.title}
                         />
                     ) : isImage ? (
@@ -82,18 +82,18 @@ export default function FilePreviewModal({ document, version, isOpen, onClose }:
                             <img
                                 src={previewUrl}
                                 alt={document.title}
-                                className="max-h-[75vh] max-w-full object-contain rounded-lg shadow-xl border border-slate-800"
+                                className="max-h-[75vh] max-w-full object-contain rounded-lg shadow-xl border border-slate-200"
                             />
                         </div>
                     ) : (
                         <div className="text-center p-12 space-y-3">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-400">
+                            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto text-slate-500">
                                 <Maximize2 className="w-8 h-8" />
                             </div>
                             <h4 className="text-sm font-semibold text-slate-200">
                                 المعاينة المباشرة غير مدعومة لهذا النوع من الملفات
                             </h4>
-                            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                            <p className="text-xs text-slate-500 max-w-sm mx-auto">
                                 ({targetVersion?.mime_type || 'ملف غير معروف'}) يمكنك تحميل الملف لفتحه عبر التطبيق المخصص على جهازك.
                             </p>
                             <a

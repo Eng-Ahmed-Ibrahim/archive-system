@@ -47,8 +47,8 @@ export default function CategoryTree({
                     onClick={() => onSelectCategory && onSelectCategory(category)}
                     className={`group flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
                         isSelected
-                            ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/50'
-                            : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                            ? 'bg-indigo-600/30 text-indigo-700 border border-indigo-500/50'
+                            : 'text-slate-700 hover:bg-slate-100/80 hover:text-indigo-900'
                     }`}
                     style={{ paddingRight: `${depth * 14 + 10}px` }}
                 >
@@ -57,7 +57,7 @@ export default function CategoryTree({
                             <button
                                 type="button"
                                 onClick={(e) => toggleExpand(category.id, e)}
-                                className="p-0.5 text-slate-400 hover:text-white"
+                                className="p-0.5 text-slate-500 hover:text-indigo-900"
                             >
                                 {isExpanded ? (
                                     <ChevronDown className="w-3.5 h-3.5" />
@@ -70,9 +70,9 @@ export default function CategoryTree({
                         )}
 
                         {isExpanded ? (
-                            <FolderOpen className={`w-4 h-4 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-amber-400'}`} />
+                            <FolderOpen className={`w-4 h-4 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-amber-600'}`} />
                         ) : (
-                            <Folder className={`w-4 h-4 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-amber-400/80'}`} />
+                            <Folder className={`w-4 h-4 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-amber-600/80'}`} />
                         )}
 
                         <span className="truncate">{category.name}</span>
@@ -80,7 +80,7 @@ export default function CategoryTree({
 
                     <div className="flex items-center gap-1.5">
                         {typeof category.documents_count !== 'undefined' && (
-                            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">
+                            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-500 border border-slate-300/60">
                                 {category.documents_count}
                             </span>
                         )}
@@ -93,7 +93,7 @@ export default function CategoryTree({
                                     onNewFolderClick(category.id);
                                 }}
                                 title="إضافة مجلد فرعي هنا"
-                                className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-indigo-300 transition-opacity"
+                                className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-indigo-700 transition-opacity"
                             >
                                 <FolderPlus className="w-3 h-3" />
                             </button>
@@ -102,7 +102,7 @@ export default function CategoryTree({
                 </div>
 
                 {hasChildren && isExpanded && (
-                    <div className="mt-0.5 space-y-0.5 border-r border-slate-800/60 mr-3">
+                    <div className="mt-0.5 space-y-0.5 border-r border-slate-200/60 mr-3">
                         {children.map((child) => renderNode(child, depth + 1))}
                     </div>
                 )}

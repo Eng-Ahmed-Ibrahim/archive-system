@@ -90,8 +90,8 @@ export default function DocumentsIndex({ documents, filters, counts, departments
     const tabCls = (active: boolean) =>
         `flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold transition-colors ${
             active
-                ? 'bg-indigo-950/80 border-indigo-600 text-indigo-300'
-                : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
+                ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-xs'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
         }`;
 
     return (
@@ -99,9 +99,9 @@ export default function DocumentsIndex({ documents, filters, counts, departments
             <Head title="الأرشيف والمستندات - سيستم الأرشيف" />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
-                <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-indigo-400" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-indigo-600" />
                     <span>المستندات</span>
                 </h2>
 
@@ -109,10 +109,10 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     <button
                         type="button"
                         onClick={() => setShowFilters(!showFilters)}
-                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold shadow transition-colors ${
+                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-semibold shadow-xs transition-colors ${
                             showFilters
-                                ? 'bg-indigo-950/80 border-indigo-600 text-indigo-300'
-                                : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                                ? 'bg-indigo-50 border-indigo-600 text-indigo-700'
+                                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                     >
                         <Filter className="w-4 h-4" />
@@ -122,7 +122,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     {canUpload && (
                         <Link
                             href="/documents/create"
-                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow transition-colors"
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors"
                         >
                             <FilePlus className="w-4 h-4" />
                             <span>رفع ملف جديد</span>
@@ -145,7 +145,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     onClick={() => applyFilters({ status: 'pending', direction: undefined })}
                     className={tabCls(status === 'pending')}
                 >
-                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <Clock className="w-3.5 h-3.5 text-amber-500" />
                     <span>قيد الإجراء ({counts.pending ?? 0})</span>
                 </button>
                 <button
@@ -153,7 +153,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     onClick={() => applyFilters({ status: 'finish', direction: undefined })}
                     className={tabCls(status === 'finish')}
                 >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                     <span>مكتمل ({counts.finish ?? 0})</span>
                 </button>
                 <button
@@ -161,7 +161,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     onClick={() => applyFilters({ direction: 'incoming', status: undefined })}
                     className={tabCls(direction === 'incoming')}
                 >
-                    <ArrowDownToLine className="w-3.5 h-3.5" />
+                    <ArrowDownToLine className="w-3.5 h-3.5 text-indigo-600" />
                     <span>وارد ({counts.incoming})</span>
                 </button>
                 <button
@@ -169,7 +169,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     onClick={() => applyFilters({ direction: 'outgoing', status: undefined })}
                     className={tabCls(direction === 'outgoing')}
                 >
-                    <ArrowUpFromLine className="w-3.5 h-3.5" />
+                    <ArrowUpFromLine className="w-3.5 h-3.5 text-indigo-600" />
                     <span>صادر ({counts.outgoing})</span>
                 </button>
                 <button
@@ -177,7 +177,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                     onClick={() => applyFilters({ unread: unread ? undefined : '1' })}
                     className={tabCls(unread)}
                 >
-                    <Bell className="w-3.5 h-3.5" />
+                    <Bell className="w-3.5 h-3.5 text-indigo-600" />
                     <span>لم أقرأها</span>
                 </button>
             </div>
@@ -192,12 +192,12 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="ابحث بالعنوان أو الرقم المرجعي..."
-                            className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pr-10 pl-4 py-2.5 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-inner"
+                            className="w-full bg-white border border-slate-200 rounded-xl pr-10 pl-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-inner"
                         />
                     </div>
                     <button
                         type="submit"
-                        className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 shadow"
+                        className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold border border-slate-200 shadow-xs"
                     >
                         بحث
                     </button>
@@ -205,7 +205,7 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                         <button
                             type="button"
                             onClick={clearFilters}
-                            className="px-3.5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-rose-950/60 border border-slate-700 text-slate-400 hover:text-rose-300 transition-colors"
+                            className="px-3.5 py-2.5 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 text-slate-500 hover:text-rose-600 transition-colors"
                             title="إلغاء جميع الفلاتر"
                         >
                             <RefreshCw className="w-4 h-4" />
@@ -214,16 +214,16 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                 </form>
 
                 {showFilters && (
-                    <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
+                    <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xl space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {isAdmin && (
                                 <>
                                     <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-slate-400">القسم</label>
+                                        <label className="text-[11px] font-semibold text-slate-600">القسم</label>
                                         <select
                                             value={departmentId}
                                             onChange={(e) => setDepartmentId(e.target.value)}
-                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                                         >
                                             <option value="">كافة الأقسام</option>
                                             {departments.map((d) => (
@@ -235,11 +235,11 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                                     </div>
 
                                     <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-slate-400">المجلد</label>
+                                        <label className="text-[11px] font-semibold text-slate-600">المجلد</label>
                                         <select
                                             value={categoryId}
                                             onChange={(e) => setCategoryId(e.target.value)}
-                                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                                         >
                                             <option value="">كافة المجلدات</option>
                                             {categories.map((c) => (
@@ -253,38 +253,38 @@ export default function DocumentsIndex({ documents, filters, counts, departments
                             )}
 
                             <div className="space-y-1">
-                                <label className="text-[11px] font-semibold text-slate-400">من تاريخ</label>
+                                <label className="text-[11px] font-semibold text-slate-600">من تاريخ</label>
                                 <input
                                     type="date"
                                     value={dateFrom}
                                     onChange={(e) => setDateFrom(e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-[11px] font-semibold text-slate-400">إلى تاريخ</label>
+                                <label className="text-[11px] font-semibold text-slate-600">إلى تاريخ</label>
                                 <input
                                     type="date"
                                     value={dateTo}
                                     onChange={(e) => setDateTo(e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                                 />
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                             <button
                                 type="button"
                                 onClick={clearFilters}
-                                className="px-3.5 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white"
+                                className="px-3.5 py-1.5 rounded-lg text-xs text-slate-500 hover:text-slate-800"
                             >
                                 مسح الفلاتر
                             </button>
                             <button
                                 type="button"
                                 onClick={() => applyFilters()}
-                                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow"
+                                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs"
                             >
                                 تطبيق
                             </button>

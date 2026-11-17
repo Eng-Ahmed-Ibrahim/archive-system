@@ -39,7 +39,7 @@ export default function Login({ demoUsers }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 antialiased selection:bg-indigo-500 selection:text-white" dir="rtl">
+        <div className="min-h-screen bg-slate-150 text-slate-900 flex flex-col justify-center items-center p-4 antialiased selection:bg-indigo-500 selection:text-white" dir="rtl">
             <Head title="تسجيل الدخول - سيستم الأرشيف" />
 
             <div className="w-full max-w-md space-y-6">
@@ -53,10 +53,10 @@ export default function Login({ demoUsers }: Props) {
                     </h1>
                 </div>
                 {/* Standard Login Form */}
-                <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-4">
+                <div className="bg-white/60 border border-slate-200/80 rounded-2xl p-6 shadow-xl space-y-4">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-1">
-                            <label className="block text-xs font-semibold text-slate-300">
+                            <label className="block text-xs font-semibold text-slate-700">
                                 البريد الإلكتروني
                             </label>
                             <div className="relative">
@@ -65,7 +65,7 @@ export default function Login({ demoUsers }: Props) {
                                     type="email"
                                     value={data.email}
                                     onChange={(e) => setData('email', e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                    className="w-full bg-slate-150 border border-slate-300/80 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                                     placeholder="name@example.com"
                                     required
                                 />
@@ -76,7 +76,7 @@ export default function Login({ demoUsers }: Props) {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="block text-xs font-semibold text-slate-300">
+                            <label className="block text-xs font-semibold text-slate-700">
                                 كلمة المرور
                             </label>
                             <div className="relative">
@@ -85,7 +85,7 @@ export default function Login({ demoUsers }: Props) {
                                     type="password"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-700/80 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                                    className="w-full bg-slate-150 border border-slate-300/80 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -101,9 +101,9 @@ export default function Login({ demoUsers }: Props) {
                                     type="checkbox"
                                     checked={data.remember}
                                     onChange={(e) => setData('remember', e.target.checked)}
-                                    className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-0"
+                                    className="rounded border-slate-300 bg-slate-150 text-indigo-600 focus:ring-0"
                                 />
-                                <span className="text-slate-400">تذكرني على هذا الجهاز</span>
+                                <span className="text-slate-500">تذكرني على هذا الجهاز</span>
                             </label>
                         </div>
 
@@ -120,7 +120,7 @@ export default function Login({ demoUsers }: Props) {
 
                 {/* Footer security note */}
                 <div className="text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-slate-400" />
+                    <Shield className="w-3.5 h-3.5 text-slate-500" />
                     <span>نظام آمن ومحمي وفق معايير الحوكمة والتحقق المزدوج</span>
                 </div>
             </div>
