@@ -6,36 +6,58 @@ Built as the Joya Digital Junior Developer assessment.
 
 ## Stack
 
-- PHP 8.2+ / Laravel [VERSION]
+- PHP 8.3+ / Laravel 13
 - SQLite
-- Blade + Tailwind CSS (Vite)
-- Vanilla JavaScript (live CPL preview)
+- Blade + Tailwind CSS 
+- Vanilla JavaScript 
 - PHPUnit
 
-## Setup (fresh machine)
+## Installation
 
-Requirements: PHP 8.2+, Composer, Node.js 18+, the `pdo_sqlite` PHP extension.
+### 1. Clone the repository
 
 ```bash
-git clone [REPO_URL] ad-profit-doctor
+git clone git@github.com:Eng-Ahmed-Ibrahim/Ad-Profit-Calculator.git ad-profit-doctor
 cd ad-profit-doctor
+```
 
+### 2. Install dependencies
+
+```bash
 composer install
+npm install
+```
+
+### 3. Environment setup
+
+```bash
 cp .env.example .env
 php artisan key:generate
+```
 
+### 4. Database setup
+
+```bash
 touch database/database.sqlite
 php artisan migrate
+```
 
-npm install
+### 5. Build assets
+
+```bash
 npm run build
+```
 
+### 6. Run the application
+
+```bash
 php artisan serve
+```
 ```
 
 Open http://127.0.0.1:8000.
 
-Make sure `.env` contains `DB_CONNECTION=sqlite` (remove the `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` lines if present).
+Make sure `.env` contains `DB_CONNECTION=sqlite` .
 
 Run the tests:
 
@@ -49,7 +71,7 @@ php artisan test
 - Server-side validation with a Form Request, with an error message under each field and old input preserved.
 - A `CalculationService` that returns CPL, CPA, break-even CPL/CPA, revenue, net profit, ROAS, score, label and bottleneck.
 - A `SubmissionService` that calls the calculation and saves the result.
-- A results page (score, label, metrics, bottleneck), reachable by an unguessable UUID link.
+- A results page (score, label, metrics ).
 - Every submission is saved in a `submissions` table (inputs and results).
 - Unit tests for the calculation service.
 - A live CPL preview on the form (vanilla JS), mobile-first layout.
@@ -62,7 +84,7 @@ php artisan test
 | `SubmissionController` | HTTP only: receive, delegate, redirect |
 | `SubmissionService` | Orchestration: calculate, then save |
 | `CalculationService` | Pure calculations, no database, no HTTP |
-| `Submission` model | Persistence, casts, UUID route key |
+| `Submission` model |
 | `ResponseTime` enum | Dropdown values and their score points |
 | `BottleneckResponse` enum | The four bottleneck labels |
 
@@ -81,7 +103,7 @@ The brief does not cover it. I return **Ads / offer problem**, because money was
 **Comparisons.**
 - Score: `<` and `>` for CPL and CPA ("below" / "above"). Equal to break-even gives 0 points. The extra +10 uses `<=` because the brief says "20% or more below".
 - Bottleneck: "above break-even" is the Ads problem, so CPL equal to break-even continues to the next conditions.
-- Same-day response gives 0 points (not covered by either rule).
+- Same-day response gives 0 points .
 
 **Rounding.**
 Money values are rounded to 2 decimals before comparison to avoid floating point errors (e.g. `100.00000000000001` vs `100`).
@@ -113,19 +135,7 @@ Unit tests in `tests/Unit/CalculationServiceTest.php` cover:
 - Zero customers
 - Bottleneck: ads, follow-up, sales conversion, none
 
-## What I would improve with more time
-
-- Feature tests for the full HTTP flow (validation errors, Case C through the form, 404 on a bad UUID).
-- Rate limiting on the form and automatic deletion of old submissions (privacy).
-- Move the live preview script out of the Blade file into `resources/js`.
-- Move scoring thresholds and points into config so they can change without touching logic.
-- Add LTV and repeat purchases: the tool assumes a customer buys once, which understates the value of ads for repeat-purchase businesses.
-- Localization (Arabic/RTL) and currency selection.
-
-## Time spent
-
-Roughly [X] hours.
 
 ## Use of AI tools
 
-[Be specific and honest here. Example:] I used Claude to discuss the formulas and architecture, to review my code, and to generate the Tailwind markup for the form and results page. I wrote and adjusted the service logic, validation and tests myself and I can explain every line.
+I used Claude to discuss the formulas and architecture, to review my code, and to generate the Tailwind markup for the form and results page. I wrote and adjusted the service logic, validation and tests myself and I can explain every line.
